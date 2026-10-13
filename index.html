@@ -1,0 +1,51 @@
+
+<!DOCTYPE html>
+<!-- html file for the log-in/welcome page of timeshift  -->
+
+<html lang = "en">
+
+<head>
+    <title> TimeShift </title>
+    <meta charset = "utf-8">
+    <meta name ="viewport" content ="width=device-width, initial-scale=1.0"> 
+        <!-- name="viewport"	specifies settings for the visible webpage area.
+            width=device-width	makes the webpage width match the device's screen width.
+            initial-scale=1.0	sets the initial zoom level to 100%.-->
+    <link rel = "stylesheet" href = "log_in.css">
+</head>
+
+<body>
+    <script src = "welcome.js"> </script> 
+    <!-- timeshift heading -->
+    <!-- log in (username/email & password ) -->
+    <!-- remember me | forgot password -->
+    <!-- log in/submit button -->
+    <!-- new here? register -->
+
+    <div class = "wrapper">
+        <form action = "">
+            <h1>TimeShift</h1>
+            <h3>Login</h3>
+            <div class = "input-box">
+                <input type = "text" placeholder = "Username" required>
+            </div>
+            <div class = "input-box">
+                <input type = "password" placeholder = "Password" required>
+            </div>
+            <div class = "remember-forgot">
+                <label><input type = "checkbox"> Remember me</label>
+                <a href = "#">Forgot password?</a>
+            </div>
+
+            <button type = "submit" class = "btn">Login</button>
+
+            <div class = "register-link">
+                <p>New here? <a href = "#">Register</a></p>
+            </div>
+        </form>
+
+    </div>
+
+</body>
+
+</html>
