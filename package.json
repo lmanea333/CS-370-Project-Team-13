@@ -1,0 +1,30 @@
+{
+  "name": "cs-370-project-team-13",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lmanea333/CS-370-Project-Team-13.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/lmanea333/CS-370-Project-Team-13/issues"
+  },
+  "homepage": "https://github.com/lmanea333/CS-370-Project-Team-13#readme",
+  "dependencies": {
+    "firebase": "^13.0.0"
+  },
+  "devDependencies": {
+    "vite": "^8.3.4"
+  }
+}
