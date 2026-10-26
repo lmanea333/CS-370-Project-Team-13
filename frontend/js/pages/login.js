@@ -17,6 +17,10 @@ signInButton.addEventListener("click", async () => {
         const result = await signInWithGoogle();
 
         await saveUserProfile(result.user);
+                console.log("Sign-in and profile save successful");
+
+                // Redirect after the profile has been saved
+                window.location.href = "../pages/calendar.html";
     } catch (error) {
         console.error(error);
 
@@ -29,7 +33,6 @@ watchAuthState((user) => {
     if (user) {
         statusMessage.textContent =
             `Signed in as ${user.displayName ?? user.email}`;
-
         signInButton.hidden = true;
     } else {
         statusMessage.textContent = "Please sign in to continue.";
