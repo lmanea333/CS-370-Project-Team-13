@@ -34,6 +34,9 @@ watchAuthState((user) => {
         statusMessage.textContent =
             `Signed in as ${user.displayName ?? user.email}`;
         signInButton.hidden = true;
+        window.location.replace(
+            "./pages/dashboard.html"
+);
     } else {
         statusMessage.textContent = "Please sign in to continue.";
         signInButton.hidden = false;
