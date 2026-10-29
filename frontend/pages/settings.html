@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Settings | TimeShift</title>
+
+    <link
+        rel="stylesheet"
+        href="../css/settings.css"
+    >
+</head>
+
+<body>
+    <header class="settings-navigation">
+        <a
+            class="settings-logo"
+            href="./dashboard.html"
+        >
+            TimeShift
+        </a>
+
+        <nav class="settings-navigation-links">
+            <a href="./dashboard.html">
+                Dashboard
+            </a>
+
+            <a href="./calendar.html">
+                Calendar
+            </a>
+
+            <a href="./shared-calendar.html">
+                Shared Calendars
+            </a>
+
+            <a href="./invitations.html">
+                Invitations
+            </a>
+
+            <a
+                class="active"
+                href="./settings.html"
+            >
+                Settings
+            </a>
+        </nav>
+    </header>
+
+    <main class="settings-container">
+        <a
+            class="back-link"
+            href="./dashboard.html"
+        >
+            ← Back to Dashboard
+        </a>
+
+        <div class="settings-heading">
+            <p>Account</p>
+            <h1>Settings</h1>
+
+            <span>
+                Manage your TimeShift preferences.
+            </span>
+        </div>
+
+        <section class="settings-card">
+            <div class="card-heading">
+                <div>
+                    <h2>Google Profile</h2>
+
+                    <p>
+                        Profile information provided by
+                        Google Sign-In.
+                    </p>
+                </div>
+            </div>
+
+            <div class="profile-information">
+                <img
+                    id="profile-photo"
+                    class="profile-photo"
+                    alt="User profile"
+                >
+
+                <div class="profile-fields">
+                    <label>
+                        Display name
+
+                        <input
+                            id="profile-name"
+                            type="text"
+                            readonly
+                        >
+                    </label>
+
+                    <label>
+                        Email
+
+                        <input
+                            id="profile-email"
+                            type="email"
+                            readonly
+                        >
+                    </label>
+                </div>
+            </div>
+        </section>
+
+        <form id="settings-form">
+            <section class="settings-card">
+                <div class="card-heading">
+                    <div>
+                        <h2>Timezone</h2>
+
+                        <p>
+                            Events will be displayed in
+                            this timezone.
+                        </p>
+                    </div>
+                </div>
+
+                <label class="settings-field">
+                    Default timezone
+
+                    <select
+                        id="timezone-select"
+                        name="timeZone"
+                        required
+                    >
+                        <option value="">
+                            Select a timezone
+                        </option>
+                    </select>
+                </label>
+
+                <div class="timezone-preview">
+                    <span>Current local time</span>
+
+                    <strong id="timezone-preview">
+                        Loading...
+                    </strong>
+                </div>
+            </section>
+
+            <section class="settings-card">
+                <div class="card-heading">
+                    <div>
+                        <h2>Appearance</h2>
+
+                        <p>
+                            Choose the color palette used
+                            throughout TimeShift.
+                        </p>
+                    </div>
+                </div>
+
+                <label class="settings-field">
+                    Theme palette
+
+                    <select
+                        id="theme-setting"
+                        name="theme"
+                    >
+                        <option value="neutral">
+                            Neutral
+                        </option>
+
+                        <option value="sage">
+                            Sage
+                        </option>
+
+                        <option value="ocean">
+                            Ocean
+                        </option>
+
+                        <option value="plum">
+                            Plum
+                        </option>
+
+                        <option value="warm">
+                            Warm
+                        </option>
+                    </select>
+                </label>
+
+                <div
+                    id="theme-preview"
+                    class="theme-preview"
+                >
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </section>
+
+            <section class="settings-card">
+                <div class="card-heading">
+                    <div>
+                        <h2>Calendar Preferences</h2>
+
+                        <p>
+                            Select where new events are
+                            saved by default.
+                        </p>
+                    </div>
+                </div>
+
+                <label class="settings-field">
+                    Default calendar
+
+                    <select
+                        id="default-calendar-setting"
+                        name="defaultCalendarId"
+                    >
+                        <option value="personal">
+                            My Calendar
+                        </option>
+                    </select>
+                </label>
+            </section>
+
+            <p
+                id="settings-status"
+                class="settings-status"
+                aria-live="polite"
+            ></p>
+
+            <div class="settings-actions">
+                <button
+                    class="save-settings-button"
+                    type="submit"
+                >
+                    Save Settings
+                </button>
+            </div>
+        </form>
+
+        <section class="settings-card account-actions">
+            <div>
+                <h2>Account Actions</h2>
+
+                <p>
+                    Sign out of TimeShift on this device.
+                </p>
+            </div>
+
+            <button
+                id="settings-sign-out"
+                class="settings-sign-out"
+                type="button"
+            >
+                Sign Out
+            </button>
+        </section>
+    </main>
+
+    <script
+        type="module"
+        src="../js/pages/settings.js"
+    ></script>
+</body>
+</html>
