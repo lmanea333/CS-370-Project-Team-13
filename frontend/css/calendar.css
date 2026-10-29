@@ -60,3 +60,121 @@ body {
     margin: 0 10px;
   }
 }
+/* TimeShift layout additions */
+
+:root {
+  --calendar-accent: #383b36;
+  --calendar-accent-soft: #e8e9e4;
+}
+
+[data-theme="sage"] {
+  --calendar-accent: #536b5a;
+  --calendar-accent-soft: #e5ece6;
+}
+
+[data-theme="ocean"] {
+  --calendar-accent: #456476;
+  --calendar-accent-soft: #e4ebef;
+}
+
+[data-theme="plum"] {
+  --calendar-accent: #675668;
+  --calendar-accent-soft: #eee8ef;
+}
+
+[data-theme="warm"] {
+  --calendar-accent: #795f49;
+  --calendar-accent-soft: #f0e9e2;
+}
+
+body {
+  display: block;
+  height: auto;
+  min-height: 100vh;
+}
+
+.calendar-navigation {
+  align-items: center;
+  background-color: white;
+  border-bottom: 1px solid #dedfd9;
+  display: flex;
+  justify-content: space-between;
+  padding: 15px 32px;
+}
+
+.calendar-logo {
+  color: #20211f;
+  font-size: 22px;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.calendar-navigation-links {
+  display: flex;
+  gap: 6px;
+}
+
+.calendar-navigation-links a {
+  border-radius: 8px;
+  color: #6c6e68;
+  padding: 9px 11px;
+  text-decoration: none;
+}
+
+.calendar-navigation-links a:hover,
+.calendar-navigation-links a.active {
+  background-color: var(--calendar-accent-soft);
+  color: var(--calendar-accent);
+}
+
+.back-to-dashboard {
+  color: #6c6e68;
+  display: block;
+  margin: 24px auto 12px;
+  max-width: 1100px;
+  padding: 0 24px;
+  text-decoration: none;
+}
+
+.calendar {
+  border-radius: 14px;
+  margin: 0 auto 48px;
+  max-width: 1100px;
+  overflow: hidden;
+  width: calc(100% - 48px);
+}
+
+.calendar-dates div {
+  min-height: 110px;
+  padding: 12px;
+  text-align: left;
+}
+
+.current-date {
+  background-color: var(--calendar-accent-soft);
+  color: var(--calendar-accent);
+  border-radius: 0;
+}
+
+@media (max-width: 700px) {
+  .calendar-navigation {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px 16px;
+  }
+
+  .calendar-navigation-links {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .calendar {
+    width: calc(100% - 24px);
+  }
+
+  .calendar-dates div {
+    min-height: 75px;
+    padding: 7px;
+  }
+}

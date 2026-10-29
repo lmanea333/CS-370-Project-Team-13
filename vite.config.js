@@ -32,7 +32,12 @@ export default defineConfig({
                 sharedCalendar: resolve(
                     process.cwd(),
                     "frontend/pages/shared-calendar.html"
-                )
+                ),
+                dashboard: resolve(
+                    process.cwd(),
+                    "frontend/pages/dashboard.html"
+                ),
+              
             }
         }
     }
