@@ -4,10 +4,18 @@
   <meta charset="UTF-8">
   <title>My Calendar</title>
 <link rel="stylesheet" href="../css/calendar.css">
+<link rel="stylesheet" href="../css/event-form.css">
 </head>
 <body>
     <script type="module" src="../js/pages/calendar.js"></script>
     <div class="calendar">
+    <button
+        id="open-event-form"
+        class="new-event-button"
+        type="button"
+    >
+  + New Event
+</button> 
     <div class="calendar-header">
       <button id="prev-month">‹</button>
       <div id="month-year"></div>
@@ -28,6 +36,219 @@
       </div>
     </div>
   </div>
+  <dialog
+  id="event-dialog"
+  class="event-dialog"
+>
+  <form id="event-form">
+    <div class="event-form-header">
+      <div>
+        <p class="event-form-label">TimeShift</p>
+        <h2>Create New Event</h2>
+      </div>
 
+      <button
+        id="close-event-form"
+        class="close-event-form"
+        type="button"
+        aria-label="Close event form"
+      >
+        &times;
+      </button>
+    </div>
+
+    <div class="form-field">
+      <label for="event-title">Event title *</label>
+
+      <input
+        id="event-title"
+        name="title"
+        type="text"
+        placeholder="Example: Team meeting"
+        required
+      >
+    </div>
+
+    <div class="form-field">
+      <label for="event-calendar">Calendar *</label>
+
+      <select
+        id="event-calendar"
+        name="calendarId"
+        required
+      >
+        <option value="personal">My Calendar</option>
+      </select>
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label for="event-date">Date *</label>
+
+        <input
+          id="event-date"
+          name="date"
+          type="date"
+          required
+        >
+      </div>
+
+      <div class="form-field">
+        <label for="event-timezone">Event timezone *</label>
+
+        <select
+          id="event-timezone"
+          name="timeZone"
+          required
+        >
+          <option value="">Select a timezone</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label for="event-start-time">Start time *</label>
+
+        <input
+          id="event-start-time"
+          name="startTime"
+          type="time"
+          required
+        >
+      </div>
+
+      <div class="form-field">
+        <label for="event-end-time">End time</label>
+
+        <input
+          id="event-end-time"
+          name="endTime"
+          type="time"
+        >
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label for="event-location">Location</label>
+
+      <input
+        id="event-location"
+        name="location"
+        type="text"
+        placeholder="Example: Science Hall 201"
+      >
+    </div>
+
+    <div class="form-field">
+      <label for="event-meeting-link">Meeting link</label>
+
+      <input
+        id="event-meeting-link"
+        name="meetingLink"
+        type="url"
+        placeholder="https://..."
+      >
+    </div>
+
+    <div class="form-field">
+      <label for="event-description">Description</label>
+
+      <textarea
+        id="event-description"
+        name="description"
+        rows="3"
+        placeholder="Add event details"
+      ></textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label for="event-category">Category</label>
+
+        <select
+          id="event-category"
+          name="category"
+        >
+          <option value="">No category</option>
+          <option value="school">School</option>
+          <option value="work">Work</option>
+          <option value="personal">Personal</option>
+          <option value="appointment">Appointment</option>
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label for="event-color">Color</label>
+
+        <input
+          id="event-color"
+          name="color"
+          type="color"
+          value="#315efb"
+        >
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label for="event-repeat">Repeat</label>
+
+        <select
+          id="event-repeat"
+          name="repetition"
+        >
+          <option value="none">Does not repeat</option>
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+          <option value="yearly">Yearly</option>
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label for="event-reminder">Reminder</label>
+
+        <select
+          id="event-reminder"
+          name="reminderMinutes"
+        >
+          <option value="none">No reminder</option>
+          <option value="10">10 minutes before</option>
+          <option value="30">30 minutes before</option>
+          <option value="60">1 hour before</option>
+          <option value="1440">1 day before</option>
+        </select>
+      </div>
+    </div>
+
+    <p
+      id="event-form-status"
+      class="event-form-status"
+      aria-live="polite"
+    ></p>
+
+    <div class="event-form-actions">
+      <button
+        id="cancel-event"
+        class="cancel-event-button"
+        type="button"
+      >
+        Cancel
+      </button>
+
+      <button
+        class="save-event-button"
+        type="submit"
+      >
+        Save Event
+      </button>
+    </div>
+  </form>
+</dialog>
+<script
+  type="module"
+  src="../js/pages/event-form.js"
+></script>
 </body>
 </html>
