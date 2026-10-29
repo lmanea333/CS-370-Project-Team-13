@@ -9,6 +9,11 @@ class Event {
         endAt = null,
         timeZone = "UTC",
         location = "",
+        meetingLink = "",
+        category = "",
+        color = "#315efb",
+        status = "scheduled",
+        repetitionId = null,
         attendeeIds = [],
         createdAt = null,
         updatedAt = null
@@ -22,6 +27,11 @@ class Event {
         this.endAt = endAt;
         this.timeZone = timeZone;
         this.location = location;
+        this.meetingLink = meetingLink;
+        this.category = category;
+        this.color = color;
+        this.status = status;
+        this.repetitionId = repetitionId;
         this.attendeeIds = [...attendeeIds];
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -37,6 +47,11 @@ class Event {
             endAt: this.endAt,
             timeZone: this.timeZone,
             location: this.location,
+            meetingLink: this.meetingLink,
+            category: this.category,
+            color: this.color,
+            status: this.status,
+            repetitionId: this.repetitionId,
             attendeeIds: [...this.attendeeIds],
             createdAt: this.createdAt,
             updatedAt: this.updatedAt
@@ -56,6 +71,11 @@ class Event {
             endAt: data.endAt,
             timeZone: data.timeZone,
             location: data.location,
+            meetingLink: data.meetingLink ?? "",
+            category: data.category ?? "",
+            color: data.color ?? "#315efb",
+            status: data.status ?? "scheduled",
+            repetitionId: data.repetitionId ?? null,
             attendeeIds: data.attendeeIds ?? [],
             createdAt: data.createdAt,
             updatedAt: data.updatedAt
@@ -63,5 +83,5 @@ class Event {
     }
 }
 
-export { Event };
+export{ Event };
 export default Event;

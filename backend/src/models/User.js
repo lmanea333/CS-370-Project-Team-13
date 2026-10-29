@@ -5,13 +5,18 @@ class User {
         email = "",
         photoURL = "",
         timeZone = "UTC",
-        lastLoginAt = null
+        accountStatus= "active",
+        lastLoginAt = null,
+        createdAt = null
+
     } = {}) {
         this.uid = uid;
         this.displayName = displayName;
         this.email = email;
         this.photoURL = photoURL;
         this.timeZone = timeZone;
+        this.accountStatus = accountStatus;
+        this.createdAt = createdAt;
         this.lastLoginAt = lastLoginAt;
     }
 
@@ -21,6 +26,8 @@ class User {
             email: this.email,
             photoURL: this.photoURL,
             timeZone: this.timeZone,
+            accountStatus: this.accountStatus,
+            createdAt: this.createdAt,
             lastLoginAt: this.lastLoginAt
         };
     }
@@ -33,8 +40,11 @@ class User {
             displayName: data.displayName,
             email: data.email,
             photoURL: data.photoURL,
-            timeZone: data.timeZone,
-            lastLoginAt: data.lastLoginAt
+            timeZone: data.timeZone ?? "UTC",
+            accountStatus: data.accountStatus ?? "active",
+            createdAt: data.createdAt ?? null,
+            lastLoginAt: data.lastLoginAt ?? null
+          
         });
     }
 }
