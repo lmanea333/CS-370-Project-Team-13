@@ -37,6 +37,8 @@ export default defineConfig({
                     process.cwd(),
                     "frontend/pages/dashboard.html"
                 ),
+                    settings: resolve(process.cwd(), "frontend/pages/settings.html"
+                ),
               
             }
         }
