@@ -1,3 +1,7 @@
+/* --------------------------------------------------
+   1. Default colors
+   -------------------------------------------------- */
+
 :root,
 [data-theme="neutral"] {
     --page-background: #f5f5f2;
@@ -10,6 +14,14 @@
     --accent-hover: #242622;
     --accent-soft: #e8e9e4;
 }
+
+
+/* --------------------------------------------------
+   2. Optional color themes
+
+   settings.js adds one of these theme names
+   to the HTML page.
+   -------------------------------------------------- */
 
 [data-theme="sage"] {
     --accent: #536b5a;
@@ -35,6 +47,11 @@
     --accent-soft: #f0e9e2;
 }
 
+
+/* --------------------------------------------------
+   3. Basic page styles
+   -------------------------------------------------- */
+
 * {
     box-sizing: border-box;
 }
@@ -42,12 +59,7 @@
 body {
     background-color: var(--page-background);
     color: var(--text-primary);
-    font-family:
-        Inter,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
+    font-family: Arial, sans-serif;
     margin: 0;
     min-height: 100vh;
 }
@@ -59,9 +71,14 @@ a {
     font: inherit;
 }
 
+
+/* --------------------------------------------------
+   4. Top navigation bar
+   -------------------------------------------------- */
+
 .settings-navigation {
     align-items: center;
-    background-color: white;
+    background-color: var(--surface);
     border-bottom: 1px solid var(--border);
     display: flex;
     justify-content: space-between;
@@ -71,7 +88,7 @@ a {
 .settings-logo {
     color: var(--text-primary);
     font-size: 22px;
-    font-weight: 700;
+    font-weight: bold;
     text-decoration: none;
 }
 
@@ -93,6 +110,11 @@ a {
     background-color: var(--accent-soft);
     color: var(--accent);
 }
+
+
+/* --------------------------------------------------
+   5. Main settings page
+   -------------------------------------------------- */
 
 .settings-container {
     margin: 30px auto 60px;
@@ -119,7 +141,7 @@ a {
 .settings-heading > p {
     color: var(--accent);
     font-size: 11px;
-    font-weight: 700;
+    font-weight: bold;
     letter-spacing: 1.2px;
     margin: 0;
     text-transform: uppercase;
@@ -127,13 +149,17 @@ a {
 
 .settings-heading h1 {
     font-size: 32px;
-    letter-spacing: -0.7px;
     margin: 6px 0 8px;
 }
 
 .settings-heading span {
     color: var(--text-secondary);
 }
+
+
+/* --------------------------------------------------
+   6. Settings cards
+   -------------------------------------------------- */
 
 .settings-card {
     background-color: var(--surface);
@@ -162,6 +188,11 @@ a {
     margin: 0;
 }
 
+
+/* --------------------------------------------------
+   7. Google profile
+   -------------------------------------------------- */
+
 .profile-information {
     align-items: center;
     display: grid;
@@ -183,12 +214,17 @@ a {
     grid-template-columns: 1fr 1fr;
 }
 
+
+/* --------------------------------------------------
+   8. Labels, inputs, and dropdowns
+   -------------------------------------------------- */
+
 .profile-fields label,
 .settings-field {
     color: var(--text-secondary);
     display: block;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: bold;
 }
 
 .profile-fields input,
@@ -215,6 +251,11 @@ a {
     outline: none;
 }
 
+
+/* --------------------------------------------------
+   9. Timezone preview
+   -------------------------------------------------- */
+
 .timezone-preview {
     align-items: center;
     background-color: var(--surface-soft);
@@ -230,6 +271,11 @@ a {
     font-size: 13px;
 }
 
+
+/* --------------------------------------------------
+   10. Theme color preview
+   -------------------------------------------------- */
+
 .theme-preview {
     display: flex;
     gap: 8px;
@@ -243,17 +289,25 @@ a {
     width: 42px;
 }
 
+/* First box shows the main theme color */
 .theme-preview span:nth-child(1) {
     background-color: var(--accent);
 }
 
+/* Second box shows the light theme color */
 .theme-preview span:nth-child(2) {
     background-color: var(--accent-soft);
 }
 
+/* Third box shows the page background color */
 .theme-preview span:nth-child(3) {
-    background-color: var(--surface-soft);
+    background-color: var(--page-background);
 }
+
+
+/* --------------------------------------------------
+   11. Save settings
+   -------------------------------------------------- */
 
 .settings-status {
     color: var(--accent);
@@ -274,13 +328,18 @@ a {
     border-radius: 9px;
     color: white;
     cursor: pointer;
-    font-weight: 600;
+    font-weight: bold;
     padding: 12px 18px;
 }
 
 .save-settings-button:hover {
     background-color: var(--accent-hover);
 }
+
+
+/* --------------------------------------------------
+   12. Account and sign-out section
+   -------------------------------------------------- */
 
 .account-actions {
     align-items: center;
@@ -300,6 +359,11 @@ a {
 .settings-sign-out:hover {
     background-color: #f9ecec;
 }
+
+
+/* --------------------------------------------------
+   13. Smaller screens and phones
+   -------------------------------------------------- */
 
 @media (max-width: 700px) {
     .settings-navigation {

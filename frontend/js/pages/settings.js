@@ -1,122 +1,245 @@
+// Import the worldwide timezone list
 import { getTimeZones } from "@vvo/tzdb";
+
+// Import our Google authentication functions
 import { logOut, watchAuthState } from "../../firebase/auth.js";
 
+
+// --------------------------------------------------
+// 1. Get the elements from settings.html
+// --------------------------------------------------
+
 const settingsForm = document.getElementById("settings-form");
+
 const timeZoneSelect = document.getElementById("timezone-select");
 const themeSelect = document.getElementById("theme-select");
 const defaultCalendarSelect = document.getElementById("default-calendar");
+
 const currentTime = document.getElementById("current-time");
 const saveStatus = document.getElementById("save-status");
-const signOutButton = document.getElementById("sign-out-button");
 
 const profilePhoto = document.getElementById("profile-photo");
 const profileName = document.getElementById("profile-name");
 const profileEmail = document.getElementById("profile-email");
 
+const signOutButton = document.getElementById("sign-out-button");
+
+
+// --------------------------------------------------
+// 2. Add worldwide timezones to the dropdown
+// --------------------------------------------------
+
+function addTimeZonesToDropdown() {
+    const timeZones = getTimeZones({ includeUtc: true });
+
+    for (const zone of timeZones) {
+        const option = document.createElement("option");
+
+        // This is the timezone value that will be saved
+        option.value = zone.name;
+
+        // Use the timezone name if no city is available
+        let location = zone.name;
+
+        // Use city names when the timezone has them
+        if (zone.mainCities && zone.mainCities.length > 0) {
+            location = zone.mainCities.join(", ");
+        }
+
+        // This is what the user sees in the dropdown
+        option.textContent =
+            location + " — " + zone.currentTimeFormat;
+
+        timeZoneSelect.appendChild(option);
+    }
+}
+
+
+// --------------------------------------------------
+// 3. Change the page color theme
+// --------------------------------------------------
+
 function applyTheme(theme) {
     document.documentElement.dataset.theme = theme;
 }
 
-function populateTimeZones() {
-    const timeZones = getTimeZones({ includeUtc: true });
-
-    timeZones.forEach((zone) => {
-        const option = document.createElement("option");
-        option.value = zone.name;
-
-        const location =
-            zone.mainCities?.length > 0
-                ? zone.mainCities.join(", ")
-                : zone.name;
-
-        option.textContent =
-            `${location} — ${zone.currentTimeFormat}`;
-
-        timeZoneSelect.appendChild(option);
-    });
+function changeTheme() {
+    const selectedTheme = themeSelect.value;
+    applyTheme(selectedTheme);
 }
 
-function updateCurrentTime() {
-    const selectedZone = timeZoneSelect.value;
 
-    if (!selectedZone) {
+// --------------------------------------------------
+// 4. Display the current time
+// --------------------------------------------------
+
+function updateCurrentTime() {
+    const selectedTimeZone = timeZoneSelect.value;
+
+    // Do not show a time if no timezone is selected
+    if (selectedTimeZone === "") {
         currentTime.textContent = "";
         return;
     }
 
     try {
-        const formattedTime = new Intl.DateTimeFormat("en-US", {
-            timeZone: selectedZone,
+        const timeOptions = {
+            timeZone: selectedTimeZone,
             dateStyle: "medium",
             timeStyle: "long"
-        }).format(new Date());
+        };
 
-        currentTime.textContent = `Current time: ${formattedTime}`;
+        const dateFormatter =
+            new Intl.DateTimeFormat("en-US", timeOptions);
+
+        const formattedTime = dateFormatter.format(new Date());
+
+        currentTime.textContent =
+            "Current time: " + formattedTime;
     } catch (error) {
-        currentTime.textContent = "Unable to display this time zone.";
+        currentTime.textContent =
+            "Unable to display this timezone.";
     }
 }
 
-const savedTheme =
-    localStorage.getItem("timeshift-theme") || "neutral";
 
-const savedTimeZone =
-    localStorage.getItem("timeshift-timezone") ||
-    Intl.DateTimeFormat().resolvedOptions().timeZone;
+// --------------------------------------------------
+// 5. Load previously saved settings
+// --------------------------------------------------
 
-const savedCalendar =
-    localStorage.getItem("timeshift-default-calendar") || "personal";
+function loadSavedSettings() {
+    let savedTheme =
+        localStorage.getItem("timeshift-theme");
 
-populateTimeZones();
+    let savedTimeZone =
+        localStorage.getItem("timeshift-timezone");
 
-themeSelect.value = savedTheme;
-timeZoneSelect.value = savedTimeZone;
-defaultCalendarSelect.value = savedCalendar;
+    let savedCalendar =
+        localStorage.getItem("timeshift-default-calendar");
 
-applyTheme(savedTheme);
-updateCurrentTime();
+    // Use these default values when nothing was saved
+    if (!savedTheme) {
+        savedTheme = "neutral";
+    }
 
-themeSelect.addEventListener("change", () => {
-    applyTheme(themeSelect.value);
-});
+    if (!savedTimeZone) {
+        savedTimeZone =
+            Intl.DateTimeFormat().resolvedOptions().timeZone;
+    }
 
-timeZoneSelect.addEventListener("change", updateCurrentTime);
+    if (!savedCalendar) {
+        savedCalendar = "personal";
+    }
 
-setInterval(updateCurrentTime, 1000);
+    // Put the saved choices into the dropdowns
+    themeSelect.value = savedTheme;
+    timeZoneSelect.value = savedTimeZone;
+    defaultCalendarSelect.value = savedCalendar;
 
-settingsForm.addEventListener("submit", (event) => {
+    applyTheme(savedTheme);
+    updateCurrentTime();
+}
+
+
+// --------------------------------------------------
+// 6. Save settings in the browser
+// --------------------------------------------------
+
+function saveSettings(event) {
+    // Stop the form from refreshing the page
     event.preventDefault();
 
-    localStorage.setItem("timeshift-theme", themeSelect.value);
-    localStorage.setItem("timeshift-timezone", timeZoneSelect.value);
+    const selectedTheme = themeSelect.value;
+    const selectedTimeZone = timeZoneSelect.value;
+    const selectedCalendar = defaultCalendarSelect.value;
+
     localStorage.setItem(
-        "timeshift-default-calendar",
-        defaultCalendarSelect.value
+        "timeshift-theme",
+        selectedTheme
     );
 
-    applyTheme(themeSelect.value);
+    localStorage.setItem(
+        "timeshift-timezone",
+        selectedTimeZone
+    );
+
+    localStorage.setItem(
+        "timeshift-default-calendar",
+        selectedCalendar
+    );
+
+    applyTheme(selectedTheme);
 
     saveStatus.textContent = "Settings saved!";
-});
+}
 
-watchAuthState((user) => {
+
+// --------------------------------------------------
+// 7. Display the signed-in Google user
+// --------------------------------------------------
+
+function displayGoogleUser(user) {
+    // Send the user to login if they are not signed in
     if (!user) {
         window.location.replace("../index.html");
         return;
     }
 
-    profileName.value = user.displayName || "TimeShift User";
-    profileEmail.value = user.email || "";
+    // Display the user's name
+    if (user.displayName) {
+        profileName.value = user.displayName;
+    } else {
+        profileName.value = "TimeShift User";
+    }
 
+    // Display the user's email
+    if (user.email) {
+        profileEmail.value = user.email;
+    } else {
+        profileEmail.value = "";
+    }
+
+    // Display the user's Google profile photo
     if (user.photoURL) {
         profilePhoto.src = user.photoURL;
-        profilePhoto.alt = `${user.displayName || "User"} profile photo`;
+        profilePhoto.alt =
+            profileName.value + " profile photo";
+
+        profilePhoto.style.display = "block";
     } else {
         profilePhoto.style.display = "none";
     }
-});
+}
 
-signOutButton.addEventListener("click", async () => {
+
+// --------------------------------------------------
+// 8. Sign the user out
+// --------------------------------------------------
+
+async function signOutUser() {
     await logOut();
     window.location.replace("../index.html");
-});
+}
+
+
+// --------------------------------------------------
+// 9. Start the Settings page
+// --------------------------------------------------
+
+// Add the timezone options first
+addTimeZonesToDropdown();
+
+// Load the user's saved choices
+loadSavedSettings();
+
+// Watch for changes made by the user
+themeSelect.addEventListener("change", changeTheme);
+timeZoneSelect.addEventListener("change", updateCurrentTime);
+settingsForm.addEventListener("submit", saveSettings);
+signOutButton.addEventListener("click", signOutUser);
+
+// Update the displayed clock every second
+setInterval(updateCurrentTime, 1000);
+
+// Get the currently signed-in Google user
+watchAuthState(displayGoogleUser);
