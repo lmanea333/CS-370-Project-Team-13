@@ -2,6 +2,18 @@
 // This library gives us a list of worldwide timezones.
 import { getTimeZones } from "@vvo/tzdb";
 
+// Converts a selected timezone time into UTC
+import { fromZonedTime } from "date-fns-tz";
+
+// Gives us the currently signed-in Google user
+import { auth } from "../../firebase/config.js";
+
+// Saves the completed event into Firestore
+import { createEvent } from "../../firebase/events.js";
+
+// Defines the fields that belong to an Event
+import Event from "../../models/Event.js";
+
 
 // --------------------------------------------------
 // 1. Connect JavaScript to the HTML elements
@@ -255,112 +267,109 @@ function eventTimesAreValid() {
 // 10. Collect the information entered in the form
 // --------------------------------------------------
 
+// Create an Event model from the form information
 function createEventDraft() {
-    // FormData collects values using each HTML field's
-    // name attribute.
     const formData = new FormData(eventForm);
 
-    // Read the selected reminder value.
-    let reminderMinutes =
-        formData.get("reminderMinutes");
+    const date = formData.get("date");
+    const startTime = formData.get("startTime");
+    const endTime = formData.get("endTime");
+    const timeZone = formData.get("timeZone");
 
-    // Convert "none" into null because null means
-    // the event does not have a reminder.
-    if (reminderMinutes === "none") {
-        reminderMinutes = null;
-    } else {
-        // Form values start as text.
-        // Number converts the reminder into a number.
-        reminderMinutes = Number(reminderMinutes);
-    }
+    // Convert the selected event time into UTC
+    const startAt = fromZonedTime(
+        `${date}T${startTime}:00`,
+        timeZone
+    );
 
-    // Put all the form values into one event object.
-    // This object can later be sent to the backend.
-    const eventDraft = {
+    // End time is optional
+    const endAt = endTime
+        ? fromZonedTime(`${date}T${endTime}:00`, timeZone)
+        : null;
+
+    const userId = auth.currentUser?.uid ?? null;
+
+    return new Event({
         calendarId: formData.get("calendarId"),
-
-        // trim() removes unnecessary spaces from
-        // the beginning and end of text.
+        createdBy: userId,
         title: formData.get("title").trim(),
-
-        description:
-            formData.get("description").trim(),
-
-        date: formData.get("date"),
-
-        startTime: formData.get("startTime"),
-
-        endTime: formData.get("endTime"),
-
-        timeZone: formData.get("timeZone"),
-
-        location:
-            formData.get("location").trim(),
-
-        meetingLink:
-            formData.get("meetingLink").trim(),
-
+        description: formData.get("description").trim(),
+        startAt: startAt,
+        endAt: endAt,
+        timeZone: timeZone,
+        location: formData.get("location").trim(),
+        meetingLink: formData.get("meetingLink").trim(),
         category: formData.get("category"),
-
         color: formData.get("color"),
-
-        repetition: formData.get("repetition"),
-
-        reminderMinutes: reminderMinutes
-    };
-
-    // Give the completed event object back to
-    // the function that submitted the form.
-    return eventDraft;
+        status: "scheduled",
+        repetitionId: null,
+        attendeeIds: userId ? [userId] : []
+    });
 }
-
 
 // --------------------------------------------------
 // 11. Handle the Save Event button
 // --------------------------------------------------
 
-function submitEventForm(event) {
-    // Forms normally refresh the webpage when submitted.
-    // preventDefault stops that refresh.
+// Validate and save the event to Firestore
+async function submitEventForm(event) {
     event.preventDefault();
-
-    // Remove any old error or success message.
     clearStatusMessage();
 
-    // reportValidity checks the HTML rules such as
-    // required fields and valid URL formats.
     if (!eventForm.reportValidity()) {
         return;
     }
 
-    // Run our additional start/end-time check.
     if (!eventTimesAreValid()) {
         return;
     }
 
-    // Collect all valid information from the form.
-    const eventDraft = createEventDraft();
+    // An event must belong to a signed-in user
+    if (!auth.currentUser) {
+        statusMessage.textContent =
+            "Please sign in before creating an event.";
+        return;
+    }
 
-    // Display the event object in the browser Console.
-    // This is temporary and helps us test the form.
-    console.log("Event form information:", eventDraft);
+    try {
+        statusMessage.textContent = "Saving event...";
 
-    // Tell the user that the form passed validation.
-    // The event is not in Firestore yet.
-    statusMessage.textContent =
-        "Event information is valid. " +
-        "The database connection comes next.";
+        // Create the Event model
+        const eventModel = createEventDraft();
 
-    // Send the event draft to any other frontend code
-    // that is listening for timeshift:event-draft.
-    //
-    // Later, this can be replaced or connected to
-    // the backend function that saves the event.
-    window.dispatchEvent(
-        new CustomEvent("timeshift:event-draft", {
-            detail: eventDraft
-        })
-    );
+        // Convert the model into Firestore data and save it
+        const eventId = await createEvent(
+            eventModel.toFirestore()
+        );
+
+        statusMessage.textContent = "Event saved!";
+
+        // Notify the Calendar page that a new event exists
+        window.dispatchEvent(
+            new CustomEvent("timeshift:event-saved", {
+                detail: {
+                    id: eventId,
+                    event: eventModel
+                }
+            })
+        );
+
+        // Clear the form after saving
+        eventForm.reset();
+        dateInput.value = getToday();
+        selectUserTimeZone();
+
+        // Briefly show the success message, then close
+        setTimeout(() => {
+            closeEventForm();
+            clearStatusMessage();
+        }, 700);
+    } catch (error) {
+        console.error("Unable to save event:", error);
+
+        statusMessage.textContent =
+            "The event could not be saved. Please try again.";
+    }
 }
 
 

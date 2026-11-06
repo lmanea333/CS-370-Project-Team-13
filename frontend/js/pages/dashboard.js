@@ -25,14 +25,7 @@ const signOutButton =
 // 2. Load the user's saved theme
 // --------------------------------------------------
 
-let selectedTheme =
-    localStorage.getItem("timeshift-theme");
 
-if (!selectedTheme) {
-    selectedTheme = "neutral";
-}
-
-document.documentElement.dataset.theme = selectedTheme;
 
 
 // --------------------------------------------------

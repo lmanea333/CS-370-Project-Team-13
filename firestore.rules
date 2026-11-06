@@ -1,0 +1,46 @@
+rules_version = '2';
+
+service cloud.firestore {
+    match /databases/{database}/documents {
+
+        // Checks whether the user signed in with Firebase
+        function signedIn() {
+            return request.auth != null;
+        }
+
+        // Each user can only access their own profile
+        match /users/{userId} {
+            allow create: if signedIn()
+                && request.auth.uid == userId;
+
+            allow read, update, delete: if signedIn()
+                && request.auth.uid == userId;
+        }
+
+        // Users can create and access their own events
+        match /events/{eventId} {
+            allow create: if signedIn()
+                && request.resource.data.createdBy
+                    == request.auth.uid;
+
+            allow read: if signedIn()
+                && resource.data.createdBy
+                    == request.auth.uid;
+
+            allow update: if signedIn()
+                && resource.data.createdBy
+                    == request.auth.uid
+                && request.resource.data.createdBy
+                    == request.auth.uid;
+
+            allow delete: if signedIn()
+                && resource.data.createdBy
+                    == request.auth.uid;
+        }
+
+        // Block anything that was not explicitly allowed
+        match /{document=**} {
+            allow read, write: if false;
+        }
+    }
+}

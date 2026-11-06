@@ -9,6 +9,11 @@
 
     <!-- Settings page design -->
     <link rel="stylesheet" href="../css/settings.css">
+    <link rel="stylesheet" href="../css/theme.css">
+    <script
+    type="module"
+    src="../js/theme.js"
+></script>
 </head>
 
 <body>
@@ -111,11 +116,18 @@
                     Theme palette
 
                     <select id="theme-select" name="theme">
-                        <option value="neutral">Neutral</option>
-                        <option value="sage">Sage</option>
-                        <option value="ocean">Ocean</option>
-                        <option value="plum">Plum</option>
-                        <option value="warm">Warm</option>
+                           <option value="system">
+                                System setting
+                          </option>
+
+                            <option value="light">
+                               Light mode
+                            </option>
+
+                             <option value="dark">
+                                Dark mode
+                             </option>
+                        </select>
                     </select>
                 </label>
 

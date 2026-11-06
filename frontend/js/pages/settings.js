@@ -3,7 +3,11 @@ import { getTimeZones } from "@vvo/tzdb";
 
 // Import our Google authentication functions
 import { logOut, watchAuthState } from "../../firebase/auth.js";
-
+import {
+    getSavedTheme,
+    applyTheme,
+    saveTheme
+} from "../theme.js";
 
 // --------------------------------------------------
 // 1. Get the elements from settings.html
@@ -59,14 +63,6 @@ function addTimeZonesToDropdown() {
 // 3. Change the page color theme
 // --------------------------------------------------
 
-function applyTheme(theme) {
-    document.documentElement.dataset.theme = theme;
-}
-
-function changeTheme() {
-    const selectedTheme = themeSelect.value;
-    applyTheme(selectedTheme);
-}
 
 
 // --------------------------------------------------
@@ -109,7 +105,7 @@ function updateCurrentTime() {
 
 function loadSavedSettings() {
     let savedTheme =
-        localStorage.getItem("timeshift-theme");
+       getSavedTheme();
 
     let savedTimeZone =
         localStorage.getItem("timeshift-timezone");
@@ -118,10 +114,6 @@ function loadSavedSettings() {
         localStorage.getItem("timeshift-default-calendar");
 
     // Use these default values when nothing was saved
-    if (!savedTheme) {
-        savedTheme = "neutral";
-    }
-
     if (!savedTimeZone) {
         savedTimeZone =
             Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -153,10 +145,6 @@ function saveSettings(event) {
     const selectedTimeZone = timeZoneSelect.value;
     const selectedCalendar = defaultCalendarSelect.value;
 
-    localStorage.setItem(
-        "timeshift-theme",
-        selectedTheme
-    );
 
     localStorage.setItem(
         "timeshift-timezone",
@@ -168,7 +156,7 @@ function saveSettings(event) {
         selectedCalendar
     );
 
-    applyTheme(selectedTheme);
+    saveTheme(selectedTheme);
 
     saveStatus.textContent = "Settings saved!";
 }
@@ -233,7 +221,9 @@ addTimeZonesToDropdown();
 loadSavedSettings();
 
 // Watch for changes made by the user
-themeSelect.addEventListener("change", changeTheme);
+themeSelect.addEventListener("change", () => {
+    applyTheme(themeSelect.value);
+});
 timeZoneSelect.addEventListener("change", updateCurrentTime);
 settingsForm.addEventListener("submit", saveSettings);
 signOutButton.addEventListener("click", signOutUser);
