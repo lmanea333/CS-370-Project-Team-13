@@ -1,0 +1,143 @@
+/* TimeShift font */
+@import url(
+    "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700&display=swap"
+);
+
+
+/* --------------------------------------------------
+   Light mode colors
+   -------------------------------------------------- */
+
+html:root,
+html[data-theme="light"] {
+    --bg: #f2f5f9;
+    --surface: #ffffff;
+    --surface-soft: #ebeff5;
+
+    --text: #15203a;
+    --muted: #5b6780;
+
+    --border: #dae0ea;
+    --border-strong: #bfc8d6;
+
+    --accent: #0e7a80;
+    --accent-hover: #0b666b;
+    --accent-soft: #e3f2f2;
+    --accent-text: #ffffff;
+
+    --secondary-accent: #b86e00;
+    --danger: #b83227;
+
+    --large-radius: 14px;
+    --small-radius: 6px;
+
+    color-scheme: light;
+    --page-background: var(--bg);
+    --text-primary: var(--text);
+    --text-secondary: var(--muted);
+}
+
+
+/* --------------------------------------------------
+   Dark mode colors
+   -------------------------------------------------- */
+
+html[data-theme="dark"] {
+    --bg: #0e1420;
+    --surface: #162033;
+    --surface-soft: #121a29;
+
+    --text: #e6ebf4;
+    --muted: #98a4ba;
+
+    --border: #25304a;
+    --border-strong: #36445f;
+
+    --accent: #3db6bc;
+    --accent-hover: #50c7cd;
+    --accent-soft: #123338;
+    --accent-text: #05292b;
+
+    --secondary-accent: #f1b24a;
+    --danger: #ff7b6e;
+
+    color-scheme: dark;
+    --page-background: var(--bg);
+    --text-primary: var(--text);
+    --text-secondary: var(--muted);
+}
+
+
+/* --------------------------------------------------
+   Follow the computer theme when no choice was saved
+   -------------------------------------------------- */
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --bg: #0e1420;
+        --surface: #162033;
+        --surface-soft: #121a29;
+
+        --text: #e6ebf4;
+        --muted: #98a4ba;
+
+        --border: #25304a;
+        --border-strong: #36445f;
+
+        --accent: #3db6bc;
+        --accent-hover: #50c7cd;
+        --accent-soft: #123338;
+        --accent-text: #05292b;
+
+        --secondary-accent: #f1b24a;
+        --danger: #ff7b6e;
+
+        color-scheme: dark;
+    }
+}
+
+
+/* --------------------------------------------------
+   Shared basic styles
+   -------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family:
+        "Bricolage Grotesque",
+        Arial,
+        sans-serif;
+    margin: 0;
+    min-height: 100vh;
+}
+
+button,
+input,
+select,
+textarea,
+a {
+    font: inherit;
+}
+
+button,
+input,
+select,
+textarea {
+    color: inherit;
+}
+
+:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.hidden {
+    display: none !important;
+}

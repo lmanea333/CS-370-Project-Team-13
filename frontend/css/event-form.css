@@ -1,3 +1,7 @@
+/* --------------------------------------------------
+   1. New Event button
+   -------------------------------------------------- */
+
 .new-event-button {
     background-color: #315efb;
     border: none;
@@ -14,6 +18,11 @@
     background-color: #2448c7;
 }
 
+
+/* --------------------------------------------------
+   2. Event popup window
+   -------------------------------------------------- */
+
 .event-dialog {
     border: none;
     border-radius: 16px;
@@ -25,13 +34,24 @@
     width: calc(100% - 32px);
 }
 
+/* Darkens the page behind the popup */
 .event-dialog::backdrop {
     background-color: rgba(15, 23, 42, 0.6);
 }
 
+
+/* --------------------------------------------------
+   3. Event form
+   -------------------------------------------------- */
+
 #event-form {
     padding: 28px;
 }
+
+
+/* --------------------------------------------------
+   4. Form heading and close button
+   -------------------------------------------------- */
 
 .event-form-header {
     align-items: flex-start;
@@ -68,10 +88,16 @@
     color: #1f2937;
 }
 
+
+/* --------------------------------------------------
+   5. Form rows and fields
+   -------------------------------------------------- */
+
+/* Places two fields beside each other */
 .form-row {
     display: grid;
     gap: 16px;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr 1fr;
 }
 
 .form-field {
@@ -87,6 +113,11 @@
     margin-bottom: 7px;
 }
 
+
+/* --------------------------------------------------
+   6. Inputs, dropdowns, and text areas
+   -------------------------------------------------- */
+
 .form-field input,
 .form-field select,
 .form-field textarea {
@@ -100,6 +131,7 @@
     width: 100%;
 }
 
+/* Highlight a field when the user selects it */
 .form-field input:focus,
 .form-field select:focus,
 .form-field textarea:focus {
@@ -112,11 +144,17 @@
     resize: vertical;
 }
 
+/* Makes the color input easier to click */
 #event-color {
     cursor: pointer;
     height: 43px;
     padding: 4px;
 }
+
+
+/* --------------------------------------------------
+   7. Validation and error message
+   -------------------------------------------------- */
 
 .event-form-status {
     color: #b91c1c;
@@ -124,6 +162,11 @@
     min-height: 20px;
     text-align: left;
 }
+
+
+/* --------------------------------------------------
+   8. Cancel and Save buttons
+   -------------------------------------------------- */
 
 .event-form-actions {
     border-top: 1px solid #e5e7eb;
@@ -161,6 +204,11 @@
     background-color: #2448c7;
 }
 
+
+/* --------------------------------------------------
+   9. Phone layout
+   -------------------------------------------------- */
+
 @media (max-width: 600px) {
     .event-dialog {
         max-height: 95vh;
@@ -171,9 +219,10 @@
         padding: 20px;
     }
 
+    /* Stack the form fields vertically */
     .form-row {
-        grid-template-columns: 1fr;
         gap: 0;
+        grid-template-columns: 1fr;
     }
 
     .event-form-actions {

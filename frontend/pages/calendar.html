@@ -5,6 +5,11 @@
   <title>My Calendar</title>
 <link rel="stylesheet" href="../css/calendar.css">
 <link rel="stylesheet" href="../css/event-form.css">
+<link rel=" stylesheet" href="../css/theme.css">
+<script
+  type="module"
+  src="../js/theme.js"
+></script>
 </head>
 <body>
     <header class="calendar-navigation">
@@ -75,11 +80,12 @@
       </div>
     </div>
   </div>
-  <dialog
-  id="event-dialog"
-  class="event-dialog"
->
+  <!-- New Event popup -->
+<dialog id="event-dialog" class="event-dialog">
+
   <form id="event-form">
+
+    <!-- Form heading -->
     <div class="event-form-header">
       <div>
         <p class="event-form-label">TimeShift</p>
@@ -96,6 +102,8 @@
       </button>
     </div>
 
+
+    <!-- Event title -->
     <div class="form-field">
       <label for="event-title">Event title *</label>
 
@@ -108,19 +116,20 @@
       >
     </div>
 
+
+    <!-- Calendar -->
     <div class="form-field">
       <label for="event-calendar">Calendar *</label>
 
-      <select
-        id="event-calendar"
-        name="calendarId"
-        required
-      >
+      <select id="event-calendar" name="calendarId" required>
         <option value="personal">My Calendar</option>
       </select>
     </div>
 
+
+    <!-- Date and timezone -->
     <div class="form-row">
+
       <div class="form-field">
         <label for="event-date">Date *</label>
 
@@ -135,17 +144,17 @@
       <div class="form-field">
         <label for="event-timezone">Event timezone *</label>
 
-        <select
-          id="event-timezone"
-          name="timeZone"
-          required
-        >
+        <select id="event-timezone" name="timeZone" required>
           <option value="">Select a timezone</option>
         </select>
       </div>
+
     </div>
 
+
+    <!-- Start and end times -->
     <div class="form-row">
+
       <div class="form-field">
         <label for="event-start-time">Start time *</label>
 
@@ -166,8 +175,11 @@
           type="time"
         >
       </div>
+
     </div>
 
+
+    <!-- Location -->
     <div class="form-field">
       <label for="event-location">Location</label>
 
@@ -179,6 +191,8 @@
       >
     </div>
 
+
+    <!-- Online meeting link -->
     <div class="form-field">
       <label for="event-meeting-link">Meeting link</label>
 
@@ -190,6 +204,8 @@
       >
     </div>
 
+
+    <!-- Event description -->
     <div class="form-field">
       <label for="event-description">Description</label>
 
@@ -201,14 +217,14 @@
       ></textarea>
     </div>
 
+
+    <!-- Category and color -->
     <div class="form-row">
+
       <div class="form-field">
         <label for="event-category">Category</label>
 
-        <select
-          id="event-category"
-          name="category"
-        >
+        <select id="event-category" name="category">
           <option value="">No category</option>
           <option value="school">School</option>
           <option value="work">Work</option>
@@ -227,16 +243,17 @@
           value="#315efb"
         >
       </div>
+
     </div>
 
+
+    <!-- Repetition and reminder -->
     <div class="form-row">
+
       <div class="form-field">
         <label for="event-repeat">Repeat</label>
 
-        <select
-          id="event-repeat"
-          name="repetition"
-        >
+        <select id="event-repeat" name="repetition">
           <option value="none">Does not repeat</option>
           <option value="daily">Daily</option>
           <option value="weekly">Weekly</option>
@@ -248,10 +265,7 @@
       <div class="form-field">
         <label for="event-reminder">Reminder</label>
 
-        <select
-          id="event-reminder"
-          name="reminderMinutes"
-        >
+        <select id="event-reminder" name="reminderMinutes">
           <option value="none">No reminder</option>
           <option value="10">10 minutes before</option>
           <option value="30">30 minutes before</option>
@@ -259,14 +273,19 @@
           <option value="1440">1 day before</option>
         </select>
       </div>
+
     </div>
 
+
+    <!-- Error or success message -->
     <p
       id="event-form-status"
       class="event-form-status"
       aria-live="polite"
     ></p>
 
+
+    <!-- Form buttons -->
     <div class="event-form-actions">
       <button
         id="cancel-event"
@@ -276,18 +295,17 @@
         Cancel
       </button>
 
-      <button
-        class="save-event-button"
-        type="submit"
-      >
+      <button class="save-event-button" type="submit">
         Save Event
       </button>
     </div>
+
   </form>
 </dialog>
+
+
+<!-- Controls the New Event popup -->
 <script
   type="module"
   src="../js/pages/event-form.js"
 ></script>
-</body>
-</html>
