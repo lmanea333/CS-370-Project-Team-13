@@ -1,3 +1,7 @@
+/* --------------------------------------------------
+   1. Default page colors
+   -------------------------------------------------- */
+
 :root,
 [data-theme="neutral"] {
     --page-background: #f5f5f2;
@@ -12,33 +16,42 @@
     --accent-text: #ffffff;
 }
 
+
+/* --------------------------------------------------
+   2. Optional color themes
+
+   dashboard.js applies the selected theme.
+   The other default colors stay the same.
+   -------------------------------------------------- */
+
 [data-theme="sage"] {
     --accent: #536b5a;
     --accent-hover: #405346;
     --accent-soft: #e5ece6;
-    --accent-text: #ffffff;
 }
 
 [data-theme="ocean"] {
     --accent: #456476;
     --accent-hover: #344e5d;
     --accent-soft: #e4ebef;
-    --accent-text: #ffffff;
 }
 
 [data-theme="plum"] {
     --accent: #675668;
     --accent-hover: #504251;
     --accent-soft: #eee8ef;
-    --accent-text: #ffffff;
 }
 
 [data-theme="warm"] {
     --accent: #795f49;
     --accent-hover: #604936;
     --accent-soft: #f0e9e2;
-    --accent-text: #ffffff;
 }
+
+
+/* --------------------------------------------------
+   3. Basic page styles
+   -------------------------------------------------- */
 
 * {
     box-sizing: border-box;
@@ -47,12 +60,7 @@
 body {
     background-color: var(--page-background);
     color: var(--text-primary);
-    font-family:
-        Inter,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
+    font-family: Arial, sans-serif;
     margin: 0;
 }
 
@@ -61,6 +69,11 @@ a,
 select {
     font: inherit;
 }
+
+
+/* --------------------------------------------------
+   4. Top navigation bar
+   -------------------------------------------------- */
 
 .app-header {
     align-items: center;
@@ -78,8 +91,7 @@ select {
 .app-logo {
     color: var(--text-primary);
     font-size: 22px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
+    font-weight: bold;
     text-decoration: none;
 }
 
@@ -106,7 +118,7 @@ select {
 .navigation-link.active {
     background-color: var(--accent-soft);
     color: var(--accent);
-    font-weight: 600;
+    font-weight: bold;
 }
 
 .notification-badge {
@@ -132,20 +144,29 @@ select {
     color: var(--text-primary);
 }
 
+
+/* --------------------------------------------------
+   5. Main dashboard area
+   -------------------------------------------------- */
+
 .dashboard-container {
     margin: 34px auto;
     max-width: 1080px;
     padding: 0 24px 40px;
 }
 
+
+/* --------------------------------------------------
+   6. Welcome section
+   -------------------------------------------------- */
+
 .dashboard-welcome {
     align-items: center;
-    background:
-        linear-gradient(
-            145deg,
-            var(--surface),
-            var(--surface-soft)
-        );
+    background: linear-gradient(
+        145deg,
+        var(--surface),
+        var(--surface-soft)
+    );
     border: 1px solid var(--border);
     border-radius: 16px;
     display: flex;
@@ -157,7 +178,7 @@ select {
 .section-label {
     color: var(--accent);
     font-size: 11px;
-    font-weight: 700;
+    font-weight: bold;
     letter-spacing: 1.2px;
     margin: 0;
     text-transform: uppercase;
@@ -165,7 +186,6 @@ select {
 
 .dashboard-welcome h1 {
     font-size: 30px;
-    letter-spacing: -0.7px;
     margin: 7px 0 10px;
 }
 
@@ -180,13 +200,18 @@ select {
     border-radius: 9px;
     color: var(--accent-text);
     cursor: pointer;
-    font-weight: 600;
+    font-weight: bold;
     padding: 12px 18px;
 }
 
 .new-event-button:hover {
     background-color: var(--accent-hover);
 }
+
+
+/* --------------------------------------------------
+   7. View and filter controls
+   -------------------------------------------------- */
 
 .dashboard-controls {
     align-items: center;
@@ -217,7 +242,7 @@ select {
     background-color: var(--surface);
     box-shadow: 0 1px 4px rgba(32, 33, 31, 0.08);
     color: var(--text-primary);
-    font-weight: 600;
+    font-weight: bold;
 }
 
 .event-filter {
@@ -235,6 +260,11 @@ select {
     color: var(--text-primary);
     padding: 8px 10px;
 }
+
+
+/* --------------------------------------------------
+   8. Upcoming-events area
+   -------------------------------------------------- */
 
 .upcoming-events {
     background-color: var(--surface);
@@ -255,7 +285,6 @@ select {
 
 .section-heading h2 {
     font-size: 22px;
-    letter-spacing: -0.4px;
     margin: 5px 0 0;
 }
 
@@ -264,6 +293,11 @@ select {
     font-size: 14px;
 }
 
+
+/* --------------------------------------------------
+   9. Event date groups and cards
+   -------------------------------------------------- */
+
 .date-group {
     margin-top: 22px;
 }
@@ -271,7 +305,7 @@ select {
 .date-heading {
     color: var(--text-secondary);
     font-size: 12px;
-    font-weight: 700;
+    font-weight: bold;
     letter-spacing: 0.8px;
     margin: 0 0 9px;
     text-transform: uppercase;
@@ -290,10 +324,7 @@ select {
     margin-bottom: 10px;
     padding: 15px;
     text-align: left;
-    transition:
-        border-color 150ms ease,
-        box-shadow 150ms ease,
-        transform 150ms ease;
+    transition: 150ms ease;
     width: 100%;
 }
 
@@ -313,12 +344,12 @@ select {
 .event-time {
     color: var(--accent);
     font-size: 14px;
-    font-weight: 700;
+    font-weight: bold;
 }
 
 .event-title {
     font-size: 16px;
-    font-weight: 650;
+    font-weight: bold;
     margin: 0 0 5px;
 }
 
@@ -333,6 +364,11 @@ select {
     font-size: 22px;
 }
 
+
+/* --------------------------------------------------
+   10. No-events message
+   -------------------------------------------------- */
+
 .empty-events {
     color: var(--text-secondary);
     padding: 50px 20px;
@@ -343,6 +379,11 @@ select {
     color: var(--text-primary);
     margin-bottom: 8px;
 }
+
+
+/* --------------------------------------------------
+   11. Tablet layout
+   -------------------------------------------------- */
 
 @media (max-width: 850px) {
     .app-header {
@@ -356,6 +397,11 @@ select {
         order: 3;
     }
 }
+
+
+/* --------------------------------------------------
+   12. Phone layout
+   -------------------------------------------------- */
 
 @media (max-width: 600px) {
     .app-header {

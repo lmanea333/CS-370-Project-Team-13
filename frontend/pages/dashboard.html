@@ -1,27 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Dashboard | TimeShift</title>
 
-    <link
-        rel="stylesheet"
-        href="../css/dashboard.css"
-    >
+    <!-- Dashboard page design -->
+    <link rel="stylesheet" href="../css/dashboard.css">
 </head>
 
 <body>
+
+    <!-- Top navigation bar -->
     <header class="app-header">
-        <a
-            class="app-logo"
-            href="./dashboard.html"
-        >
+        <a class="app-logo" href="./dashboard.html">
             TimeShift
         </a>
 
@@ -33,26 +27,18 @@
                 Dashboard
             </a>
 
-            <a
-                class="navigation-link"
-                href="./calendar.html"
-            >
+            <a class="navigation-link" href="./calendar.html">
                 Calendar
             </a>
 
-            <a
-                class="navigation-link"
-                href="./shared-calendar.html"
-            >
+            <a class="navigation-link" href="./shared-calendar.html">
                 Shared Calendars
             </a>
 
-            <a
-                class="navigation-link"
-                href="./invitations.html"
-            >
+            <a class="navigation-link" href="./invitations.html">
                 Invitations
 
+                <!-- Hidden until the user has an invitation -->
                 <span
                     id="invitation-count"
                     class="notification-badge"
@@ -62,10 +48,7 @@
                 </span>
             </a>
 
-            <a
-                class="navigation-link"
-                href="./settings.html"
-            >
+            <a class="navigation-link" href="./settings.html">
                 Settings
             </a>
         </nav>
@@ -79,12 +62,14 @@
         </button>
     </header>
 
+
+    <!-- Main dashboard -->
     <main class="dashboard-container">
+
+        <!-- Welcome message and New Event button -->
         <section class="dashboard-welcome">
             <div>
-                <p class="welcome-label">
-                    Welcome back
-                </p>
+                <p class="welcome-label">Welcome back</p>
 
                 <h1 id="user-greeting">
                     Your schedule
@@ -108,7 +93,10 @@
             </button>
         </section>
 
+
+        <!-- Event view and filter controls -->
         <section class="dashboard-controls">
+
             <div
                 class="view-options"
                 aria-label="Event view options"
@@ -121,10 +109,7 @@
                     Upcoming List
                 </button>
 
-                <a
-                    class="view-button"
-                    href="./calendar.html"
-                >
+                <a class="view-button" href="./calendar.html">
                     Calendar View
                 </a>
             </div>
@@ -152,15 +137,15 @@
             </label>
         </section>
 
+
+        <!-- Upcoming events area -->
         <section
             class="upcoming-events"
             aria-labelledby="upcoming-events-title"
         >
             <div class="section-heading">
                 <div>
-                    <p class="section-label">
-                        Schedule
-                    </p>
+                    <p class="section-label">Schedule</p>
 
                     <h2 id="upcoming-events-title">
                         Upcoming Events
@@ -172,11 +157,13 @@
                 </p>
             </div>
 
+            <!-- JavaScript adds event cards here -->
             <div
                 id="events-list"
                 class="events-list"
             ></div>
 
+            <!-- Shown when the user has no events -->
             <div
                 id="empty-events"
                 class="empty-events"
@@ -185,16 +172,19 @@
                 <h3>No upcoming events</h3>
 
                 <p>
-                    Create an event to begin building
-                    your schedule.
+                    Create an event to begin building your schedule.
                 </p>
             </div>
         </section>
+
     </main>
 
+
+    <!-- Dashboard behavior -->
     <script
         type="module"
         src="../js/pages/dashboard.js"
     ></script>
+
 </body>
 </html>

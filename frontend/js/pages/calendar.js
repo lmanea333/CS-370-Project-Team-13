@@ -74,4 +74,13 @@ calendarDates.addEventListener('click', (e) => {
     alert(`You clicked on ${e.target.textContent} ${months[currentMonth]} ${currentYear}`);
   }
 });
+// Apply the color theme selected on the Settings page
+let savedCalendarTheme =
+  localStorage.getItem("timeshift-theme");
 
+if (!savedCalendarTheme) {
+  savedCalendarTheme = "neutral";
+}
+
+document.documentElement.dataset.theme =
+  savedCalendarTheme;

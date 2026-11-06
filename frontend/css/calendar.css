@@ -1,71 +1,17 @@
-body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f6f9;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
-.calendar {
-  width: 350px;
-  background-color: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-.calendar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-}
-.calendar-header button {
-  background-color: transparent;
-  border: none;
-  font-size: 1.5em;
-  cursor: pointer;
-}
-#month-year {
-  font-size: 1.2em;
-  font-weight: bold;
-}
-.calendar-weekdays, .calendar-dates {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-}
-.calendar-weekdays div, .calendar-dates div {
-  text-align: center;
-  padding: 10px;
-}
-.calendar-weekdays {
-  background-color: #eaeef3;
-}
-.calendar-weekdays div {
-  font-weight: bold;
-}
-.calendar-dates div {
-  border-bottom: 1px solid #eaeef3;
-  cursor: pointer;
-}
-.calendar-dates div:hover {
-  background-color: #f1f1f1;
-}
-.current-date {
-  background-color: #007bff;
-  color: #fff;
-  border-radius: 50%;
-}
+/* --------------------------------------------------
+   1. Default calendar theme
+   -------------------------------------------------- */
 
-@media (max-width: 400px) {
-  .calendar {
-    width: 100%;
-    margin: 0 10px;
-  }
-}
-/* TimeShift layout additions */
-
-:root {
+:root,
+[data-theme="neutral"] {
   --calendar-accent: #383b36;
   --calendar-accent-soft: #e8e9e4;
 }
+
+
+/* --------------------------------------------------
+   2. Optional color themes
+   -------------------------------------------------- */
 
 [data-theme="sage"] {
   --calendar-accent: #536b5a;
@@ -87,11 +33,27 @@ body {
   --calendar-accent-soft: #f0e9e2;
 }
 
+
+/* --------------------------------------------------
+   3. Basic page styles
+   -------------------------------------------------- */
+
+* {
+  box-sizing: border-box;
+}
+
 body {
-  display: block;
-  height: auto;
+  background-color: #f4f6f9;
+  color: #20211f;
+  font-family: Arial, sans-serif;
+  margin: 0;
   min-height: 100vh;
 }
+
+
+/* --------------------------------------------------
+   4. Top navigation bar
+   -------------------------------------------------- */
 
 .calendar-navigation {
   align-items: center;
@@ -127,6 +89,11 @@ body {
   color: var(--calendar-accent);
 }
 
+
+/* --------------------------------------------------
+   5. Back to Dashboard link
+   -------------------------------------------------- */
+
 .back-to-dashboard {
   color: #6c6e68;
   display: block;
@@ -136,25 +103,100 @@ body {
   text-decoration: none;
 }
 
+.back-to-dashboard:hover {
+  color: var(--calendar-accent);
+}
+
+
+/* --------------------------------------------------
+   6. Main calendar
+   -------------------------------------------------- */
+
 .calendar {
+  background-color: white;
   border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   margin: 0 auto 48px;
   max-width: 1100px;
   overflow: hidden;
   width: calc(100% - 48px);
 }
 
+
+/* --------------------------------------------------
+   7. Calendar heading and month buttons
+   -------------------------------------------------- */
+
+.calendar-header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+}
+
+.calendar-header button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 24px;
+}
+
+.calendar-header button:hover {
+  color: var(--calendar-accent);
+}
+
+#month-year {
+  font-size: 19px;
+  font-weight: bold;
+}
+
+
+/* --------------------------------------------------
+   8. Weekday and date grids
+   -------------------------------------------------- */
+
+.calendar-weekdays,
+.calendar-dates {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.calendar-weekdays {
+  background-color: #eaeef3;
+}
+
+.calendar-weekdays div {
+  font-weight: bold;
+  padding: 10px;
+  text-align: center;
+}
+
 .calendar-dates div {
+  border-bottom: 1px solid #eaeef3;
+  cursor: pointer;
   min-height: 110px;
   padding: 12px;
   text-align: left;
 }
 
+.calendar-dates div:hover {
+  background-color: #f1f1f1;
+}
+
+
+/* --------------------------------------------------
+   9. Today's date
+   -------------------------------------------------- */
+
 .current-date {
   background-color: var(--calendar-accent-soft);
   color: var(--calendar-accent);
-  border-radius: 0;
 }
+
+
+/* --------------------------------------------------
+   10. Phone and small-screen layout
+   -------------------------------------------------- */
 
 @media (max-width: 700px) {
   .calendar-navigation {
