@@ -11,29 +11,33 @@ import {
 
 import { db } from "./config.js";
 
-const repetitionsCollection = collection(db, "repetitions");
+const repetitionsCollection = collection(db, "repetitions");   //reference to the repetitions collection
 
-export async function getEventRepetitions(eventId) {
-    const snapshot = await getDocs(
-        query(
-            repetitionsCollection,
-            where("eventId", "==", eventId)
-        )
-    );
+export async function getEventRepetitions(eventId) {  //gets the repetitions for an event
+    const repetitionsQuery = query(
+        repetitionsCollection,
+        where("eventId", "==", eventId)
+    );     //only looks for repetitions connected to this event
 
-    return snapshot.docs.map((repetitionDocument) => ({
-        id: repetitionDocument.id,
-        ...repetitionDocument.data()
+    const results = await getDocs(repetitionsQuery);  //runs the search
+
+    return results.docs.map((repetition) => ({    //turns each result into a regular object
+        id: repetition.id,  //adds the repetition document id
+        ...repetition.data()     //adds the rest of the repetition information
     }));
 }
 
-export function updateRepetition(repetitionId, changes) {
-    return updateDoc(doc(db, "repetitions", repetitionId), {
-        ...changes,
-        updatedAt: serverTimestamp()
+export function updateRepetition(repetitionId, changes) {   //updates an existing repetition
+    const repetitionRef = doc(db, "repetitions", repetitionId);     //finds the repetition by its id
+
+    return updateDoc(repetitionRef, {
+        ...changes,  //adds the new repetition information
+        updatedAt: serverTimestamp()     //records when the repetition was changed
     });
 }
 
-export function removeRepetition(repetitionId) {
-    return deleteDoc(doc(db, "repetitions", repetitionId));
+export function removeRepetition(repetitionId) {  //deletes an existing repetition
+    const repetitionRef = doc(db, "repetitions", repetitionId);   //finds the repetition by its id
+
+    return deleteDoc(repetitionRef);     //removes the repetition from Firestore
 }
