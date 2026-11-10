@@ -1,297 +1,168 @@
-// Import getTimeZones from the installed timezone library.
-// This library gives us a list of worldwide timezones.
 import { getTimeZones } from "@vvo/tzdb";
-
-// Converts a selected timezone time into UTC
 import { fromZonedTime } from "date-fns-tz";
-
-// Gives us the currently signed-in Google user
 import { auth } from "../../firebase/config.js";
-
-// Saves the completed event into Firestore
 import { createEvent } from "../../firebase/events.js";
-
-// Defines the fields that belong to an Event
 import Event from "../../models/Event.js";
 
-
-// --------------------------------------------------
-// 1. Connect JavaScript to the HTML elements
-// --------------------------------------------------
-
-// Button that opens the New Event popup
 const openButton =
-    document.getElementById("open-event-form");
+    document.getElementById("open-event-form");   //button that opens the event form
 
-// The <dialog> element containing the event form
 const eventDialog =
-    document.getElementById("event-dialog");
+    document.getElementById("event-dialog");  //popup that holds the form
 
-// The form inside the popup
 const eventForm =
-    document.getElementById("event-form");
+    document.getElementById("event-form");     //the form used to create an event
 
-// X button at the top of the popup
 const closeButton =
-    document.getElementById("close-event-form");
+    document.getElementById("close-event-form");  //x button at the top of the popup
 
-// Cancel button at the bottom of the popup
 const cancelButton =
-    document.getElementById("cancel-event");
+    document.getElementById("cancel-event");    //cancel button at the bottom
 
-// Area used to display an error or success message
 const statusMessage =
-    document.getElementById("event-form-status");
+    document.getElementById("event-form-status");  //shows errors and success messages
 
-// Input where the user selects the event date
 const dateInput =
-    document.getElementById("event-date");
+    document.getElementById("event-date");     //input for the event date
 
-// Input where the user selects the starting time
 const startTimeInput =
-    document.getElementById("event-start-time");
+    document.getElementById("event-start-time");  //input for the starting time
 
-// Input where the user selects the ending time
 const endTimeInput =
-    document.getElementById("event-end-time");
+    document.getElementById("event-end-time");   //input for the optional ending time
 
-// Dropdown where the user selects a timezone
 const timeZoneSelect =
-    document.getElementById("event-timezone");
+    document.getElementById("event-timezone");  //dropdown for choosing a time zone
 
-
-// --------------------------------------------------
-// 2. Create today's date in the format HTML needs
-// --------------------------------------------------
-
-function getToday() {
-    // Create a JavaScript Date containing the current date
+function getToday() {    //gets today's date in the format the input needs
     const today = new Date();
 
-    // Get the four-digit year
     const year = today.getFullYear();
 
-    // JavaScript months start at zero.
-    // January is 0, so we add 1.
     const month = String(
         today.getMonth() + 1
-    ).padStart(2, "0");
+    ).padStart(2, "0");  //adds one because JavaScript starts months at zero
 
-    // Add a zero when the day has only one digit.
-    // For example, 5 becomes 05.
     const day = String(
         today.getDate()
-    ).padStart(2, "0");
+    ).padStart(2, "0");    //adds a zero to single digit days
 
-    // HTML date inputs require the format YYYY-MM-DD.
-    // An example is 2026-11-05.
-    return year + "-" + month + "-" + day;
+    return year + "-" + month + "-" + day;  //returns the date as year-month-day
 }
 
-
-// --------------------------------------------------
-// 3. Add worldwide timezones to the dropdown
-// --------------------------------------------------
-
-function addTimeZonesToDropdown() {
-    // Ask the timezone library for every timezone.
-    // includeUtc also adds UTC to the list.
+function addTimeZonesToDropdown() {   //adds the time zones to the dropdown
     const timeZones = getTimeZones({
         includeUtc: true
-    });
+    });  //gets all available time zones including UTC
 
-    // Go through every timezone returned by the library
     for (const timeZone of timeZones) {
-        // Create a new HTML <option>
-        const option = document.createElement("option");
+        const option = document.createElement("option");    //makes a new dropdown option
 
-        // This is the value saved when the option is selected.
-        // An example is America/Los_Angeles.
-        option.value = timeZone.name;
+        option.value = timeZone.name;  //value saved when the option is selected
 
-        // Start the visible label with the current
-        // timezone format and offset.
-        let optionText = timeZone.currentTimeFormat;
+        let optionText = timeZone.currentTimeFormat;    //starts with the time zone and offset
 
-        // Add the country name when one is available.
         if (timeZone.countryName) {
             optionText =
-                optionText + " — " + timeZone.countryName;
+                optionText + " — " + timeZone.countryName;  //adds the country when available
         }
 
-        // Set the text the user sees in the dropdown.
-        option.textContent = optionText;
+        option.textContent = optionText;    //sets the text shown to the user
 
-        // Add this option to the timezone dropdown.
-        timeZoneSelect.appendChild(option);
+        timeZoneSelect.appendChild(option);  //adds the option to the dropdown
     }
 
-    // After adding all the options, automatically select
-    // the user's saved or computer timezone.
-    selectUserTimeZone();
+    selectUserTimeZone();    //selects the user's time zone after loading the list
 }
 
-
-// --------------------------------------------------
-// 4. Select the user's timezone
-// --------------------------------------------------
-
-function selectUserTimeZone() {
-    // First, look for a timezone previously saved
-    // from the Settings page.
+function selectUserTimeZone() {  //finds and selects the user's time zone
     let userTimeZone =
-        localStorage.getItem("timeshift-timezone");
+        localStorage.getItem("timeshift-timezone");   //checks for a previously saved time zone
 
-    // If nothing was saved, use the timezone reported
-    // by the user's computer or browser.
     if (!userTimeZone) {
         userTimeZone =
-            Intl.DateTimeFormat().resolvedOptions().timeZone;
+            Intl.DateTimeFormat().resolvedOptions().timeZone;  //uses the device time zone instead
     }
 
-    // Go through the dropdown options until we find
-    // the option that matches the user's timezone.
     for (const option of timeZoneSelect.options) {
         if (option.value === userTimeZone) {
-            // Display the matching option as selected.
-            timeZoneSelect.value = userTimeZone;
-
-            // Stop searching because we found the match.
-            break;
+            timeZoneSelect.value = userTimeZone;    //selects the matching option
+            break;  //stops looking after finding it
         }
     }
 }
 
-
-// --------------------------------------------------
-// 5. Clear the form message
-// --------------------------------------------------
-
-function clearStatusMessage() {
-    // Replace the existing error or success message
-    // with an empty string.
+function clearStatusMessage() {   //removes the current form message
     statusMessage.textContent = "";
 }
 
+function openEventForm() {  //opens the event popup
+    clearStatusMessage();    //removes any message left from before
 
-// --------------------------------------------------
-// 6. Open the event popup
-// --------------------------------------------------
-
-function openEventForm() {
-    // Remove an old error or success message.
-    clearStatusMessage();
-
-    // If the event date is blank, automatically
-    // start it with today's date.
     if (!dateInput.value) {
-        dateInput.value = getToday();
+        dateInput.value = getToday();  //uses today's date if the field is empty
     }
 
-    // showModal displays the dialog as a popup and
-    // darkens the page behind it.
-    eventDialog.showModal();
+    eventDialog.showModal();    //shows the form as a popup
 }
 
-
-// --------------------------------------------------
-// 7. Close the event popup
-// --------------------------------------------------
-
-function closeEventForm() {
-    // Close the dialog without changing its fields.
+function closeEventForm() {   //closes the event popup
     eventDialog.close();
 }
 
-
-// --------------------------------------------------
-// 8. Cancel and reset the form
-// --------------------------------------------------
-
-function cancelEventForm() {
-    // Clear every input in the form.
-    eventForm.reset();
-
-    // Remove any displayed message.
+function cancelEventForm() {  //clears the form and closes it
+    eventForm.reset();    //clears all the entered information
     clearStatusMessage();
 
-    // Put today's date back into the date field.
-    dateInput.value = getToday();
+    dateInput.value = getToday();  //puts today's date back in the form
 
-    // Select the user's timezone again because reset()
-    // may change the dropdown back to its first option.
-    selectUserTimeZone();
+    selectUserTimeZone();    //selects the user's time zone again
 
-    // Close the popup.
     closeEventForm();
 }
 
-
-// --------------------------------------------------
-// 9. Validate the start and end times
-// --------------------------------------------------
-
-function eventTimesAreValid() {
-    // Read the selected starting time.
+function eventTimesAreValid() {   //checks that the ending time is after the start
     const startTime = startTimeInput.value;
-
-    // Read the selected ending time.
     const endTime = endTimeInput.value;
 
-    // The ending time is optional.
-    // If the user did not enter one, the times are valid.
     if (!endTime) {
-        return true;
+        return true;  //the ending time is optional
     }
 
-    // HTML time values use a 24-hour format such as 09:30.
-    // Because of that format, they can be compared directly.
     if (endTime <= startTime) {
-        // Explain the problem to the user.
         statusMessage.textContent =
-            "End time must be later than start time.";
+            "End time must be later than start time.";    //tells the user what needs to change
 
-        // Move the typing focus to the incorrect field.
-        endTimeInput.focus();
+        endTimeInput.focus();  //moves the cursor to the ending time
 
-        // False means the form should not continue.
         return false;
     }
 
-    // True means the selected times are acceptable.
-    return true;
+    return true;    //both times are valid
 }
 
-
-// --------------------------------------------------
-// 10. Collect the information entered in the form
-// --------------------------------------------------
-
-// Create an Event model from the form information
-function createEventDraft() {
-    const formData = new FormData(eventForm);
+function createEventDraft() {  //turns the form information into an event
+    const formData = new FormData(eventForm);    //collects all the form fields
 
     const date = formData.get("date");
     const startTime = formData.get("startTime");
     const endTime = formData.get("endTime");
     const timeZone = formData.get("timeZone");
 
-    // Convert the selected event time into UTC
     const startAt = fromZonedTime(
         `${date}T${startTime}:00`,
         timeZone
-    );
+    );  //converts the selected starting time to UTC
 
-    // End time is optional
     const endAt = endTime
         ? fromZonedTime(`${date}T${endTime}:00`, timeZone)
-        : null;
+        : null;    //keeps the ending time empty if one was not entered
 
-    const userId = auth.currentUser?.uid ?? null;
+    const userId = auth.currentUser?.uid ?? null;  //gets the signed-in user's id
 
     return new Event({
         calendarId: formData.get("calendarId"),
-        createdBy: userId,
+        createdBy: userId,    //sets the current user as the event creator
         title: formData.get("title").trim(),
         description: formData.get("description").trim(),
         startAt: startAt,
@@ -301,60 +172,53 @@ function createEventDraft() {
         meetingLink: formData.get("meetingLink").trim(),
         category: formData.get("category"),
         color: formData.get("color"),
-        status: "scheduled",
-        repetitionId: null,
-        attendeeIds: userId ? [userId] : []
+        status: "scheduled",  //new events start as scheduled
+        repetitionId: null,    //added later if the event repeats
+        attendeeIds: userId ? [userId] : []  //adds the creator as the first attendee
     });
 }
 
-// --------------------------------------------------
-// 11. Handle the Save Event button
-// --------------------------------------------------
-
-// Validate and save the event to Firestore
-async function submitEventForm(event) {
-    event.preventDefault();
+async function submitEventForm(event) {   //checks the form and saves the event
+    event.preventDefault();  //stops the page from refreshing
     clearStatusMessage();
 
     if (!eventForm.reportValidity()) {
-        return;
+        return;    //stops if a required field is missing
     }
 
     if (!eventTimesAreValid()) {
-        return;
+        return;  //stops if the selected times do not work
     }
 
-    // An event must belong to a signed-in user
     if (!auth.currentUser) {
         statusMessage.textContent =
-            "Please sign in before creating an event.";
+            "Please sign in before creating an event.";   //an event needs an owner
         return;
     }
 
     try {
         statusMessage.textContent = "Saving event...";
 
-        // Create the Event model
-        const eventModel = createEventDraft();
+        const eventModel = createEventDraft();  //creates the event from the form
         const formData = new FormData(eventForm);
-        const repetition = formData.get("repetition");
+
+        const repetition = formData.get("repetition");   //gets the repetition choice
         const reminderValue = formData.get("reminderMinutes");
+
         const reminderMinutes = reminderValue === "none"
             ? null
-            : Number(reminderValue);
+            : Number(reminderValue);    //changes the reminder into a number
 
-        // Convert the model into Firestore data and save it
         const eventId = await createEvent(
             eventModel.toFirestore(),
             {
                 repetition,
                 reminderMinutes
             }
-        );
+        );  //saves the event and gets its new id
 
         statusMessage.textContent = "Event saved!";
 
-        // Notify the Calendar page that a new event exists
         window.dispatchEvent(
             new CustomEvent("timeshift:event-saved", {
                 detail: {
@@ -362,76 +226,53 @@ async function submitEventForm(event) {
                     event: eventModel
                 }
             })
-        );
+        );    //lets the calendar page know a new event was saved
 
-        // Clear the form after saving
-        eventForm.reset();
+        eventForm.reset();  //clears the form after saving
         dateInput.value = getToday();
         selectUserTimeZone();
 
-        // Briefly show the success message, then close
         setTimeout(() => {
             closeEventForm();
             clearStatusMessage();
-        }, 700);
+        }, 700);  //briefly shows the success message before closing
     } catch (error) {
         console.error("Unable to save event:", error);
 
         statusMessage.textContent =
-            "The event could not be saved. Please try again.";
+            "The event could not be saved. Please try again.";  //shows a message if saving fails
     }
 }
 
-
-// --------------------------------------------------
-// 12. Close when the dark background is clicked
-// --------------------------------------------------
-
-function closeWhenBackgroundIsClicked(event) {
-    // event.target tells us exactly what was clicked.
-    //
-    // If the dialog itself was clicked, rather than
-    // something inside the form, the dark background
-    // area was clicked.
+function closeWhenBackgroundIsClicked(event) {    //closes the form when the background is clicked
     if (event.target === eventDialog) {
-        closeEventForm();
+        closeEventForm();  //only closes when the dialog itself was clicked
     }
 }
 
+addTimeZonesToDropdown();   //loads the time zones when the page starts
 
-// --------------------------------------------------
-// 13. Start the event form
-// --------------------------------------------------
-
-// Add the worldwide timezones when the page loads.
-addTimeZonesToDropdown();
-
-// Open the popup when New Event is clicked.
 openButton.addEventListener(
     "click",
     openEventForm
-);
+);  //opens the popup when the new event button is clicked
 
-// Close the popup when the X is clicked.
 closeButton.addEventListener(
     "click",
     closeEventForm
-);
+);    //closes the popup when the x is clicked
 
-// Reset and close the popup when Cancel is clicked.
 cancelButton.addEventListener(
     "click",
     cancelEventForm
-);
+);  //clears and closes the form when cancel is clicked
 
-// Validate and collect information when Save Event is clicked.
 eventForm.addEventListener(
     "submit",
     submitEventForm
-);
+);   //checks and saves the form when it is submitted
 
-// Close the popup when its dark background is clicked.
 eventDialog.addEventListener(
     "click",
     closeWhenBackgroundIsClicked
-);
+);  //closes the popup when its background is clicked
