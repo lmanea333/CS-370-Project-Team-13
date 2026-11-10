@@ -7,61 +7,62 @@ import {
 
 import { db } from "./config.js";
 
-export async function saveUserProfile(user) {
-    const userReference = doc(db, "users", user.uid);
-    const existingProfile = await getDoc(userReference);
+export async function saveUserProfile(user) {  //saves a user's profile information
+    const userRef = doc(db, "users", user.uid);     //finds the user document using their id
+    const profile = await getDoc(userRef);  //checks if the profile already exists
 
-    const profileData = {
-        displayName: user.displayName ?? "",
-        email: user.email ?? "",
-        photoURL: user.photoURL ?? "",
-        lastLoginAt: serverTimestamp()
+    const userData = {
+        displayName: user.displayName ?? "",    //uses an empty name if one is not available
+        email: user.email ?? "",  //saves the user's email
+        photoURL: user.photoURL ?? "",     //uses an empty value if there is no profile picture
+        lastLoginAt: serverTimestamp()  //records the user's most recent login
     };
 
-    if (!existingProfile.exists()) {
-        profileData.timeZone =
-            Intl.DateTimeFormat().resolvedOptions().timeZone;
-        profileData.theme = "system";
-        profileData.defaultCalendarId = "personal";
-        profileData.accountStatus = "active";
-        profileData.createdAt = serverTimestamp();
+    if (!profile.exists()) {   //only adds these fields for a new user
+        userData.timeZone =
+            Intl.DateTimeFormat().resolvedOptions().timeZone;  //gets the user's current time zone
+
+        userData.theme = "system";     //uses the device theme by default
+        userData.defaultCalendarId = "personal";  //sets personal as the default calendar
+        userData.accountStatus = "active";    //starts the account as active
+        userData.createdAt = serverTimestamp();  //records when the account was created
     }
 
     return setDoc(
-        userReference,
-        profileData,
+        userRef,
+        userData,
         {
-            merge: true
+            merge: true   //keeps fields that are already stored
         }
     );
 }
 
-export async function getUserProfile(userId) {
-    const profileSnapshot = await getDoc(
+export async function getUserProfile(userId) {    //loads a user's saved profile
+    const profile = await getDoc(
         doc(db, "users", userId)
-    );
+    );  //gets the profile using the user's id
 
-    if (!profileSnapshot.exists()) {
-        return null;
+    if (!profile.exists()) {   //checks if a profile was found
+        return null;  //returns nothing if the profile does not exist
     }
 
     return {
-        uid: profileSnapshot.id,
-        ...profileSnapshot.data()
+        uid: profile.id,     //includes the user's document id
+        ...profile.data()  //includes the rest of the profile information
     };
 }
 
-export function updateUserSettings(userId, settings) {
-    const userReference = doc(db, "users", userId);
+export function updateUserSettings(userId, settings) {  //updates the user's settings
+    const userRef = doc(db, "users", userId);    //finds the user document
 
     return setDoc(
-        userReference,
+        userRef,
         {
-            timeZone: settings.timeZone,
-            theme: settings.theme,
-            defaultCalendarId: settings.defaultCalendarId,
-            updatedAt: serverTimestamp()
+            timeZone: settings.timeZone,   //saves the selected time zone
+            theme: settings.theme,  //saves the selected theme
+            defaultCalendarId: settings.defaultCalendarId,     //saves the default calendar
+            updatedAt: serverTimestamp()  //records when the settings were changed
         },
-        { merge: true }
+        { merge: true }    //updates these fields without replacing the whole profile
     );
 }
