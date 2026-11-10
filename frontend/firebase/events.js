@@ -1,4 +1,3 @@
-// Firebase tools needed for event documents
 import {
     collection,
     deleteDoc,
@@ -14,31 +13,28 @@ import {
 
 import { db } from "./config.js";
 
+const eventsCollection = collection(db, "events");   //reference to the events collection
 
-// Name of the Firestore collection
-const eventsCollection = collection(db, "events");
+async function createEvent(eventData, options = {}) {  //creates a new event
+    const eventRef = doc(eventsCollection);     //makes a reference for the new event
+    const batch = writeBatch(db);  //puts all the writes into one batch
+    const repetition = options.repetition ?? "none";      //defaults to no repetition
+    const reminderMinutes = options.reminderMinutes ?? null;   //defaults to no reminder
+    let repetitionId = null;  //stays null if the event does not repeat
 
-
-// Create and save a new event
-async function createEvent(eventData, options = {}) {
-    const eventReference = doc(eventsCollection);
-    const batch = writeBatch(db);
-    const repetition = options.repetition ?? "none";
-    const reminderMinutes = options.reminderMinutes ?? null;
-    let repetitionId = null;
-
-    if (repetition !== "none") {
-        const repetitionReference = doc(
+    if (repetition !== "none") {    //only runs if repetition was selected
+        const repetitionRef = doc(
             collection(db, "repetitions")
-        );
-        repetitionId = repetitionReference.id;
+        );  //makes a new repetition document
 
-        batch.set(repetitionReference, {
-            eventId: eventReference.id,
-            frequency: repetition,
+        repetitionId = repetitionRef.id;     //saves its id for the event
+
+        batch.set(repetitionRef, {
+            eventId: eventRef.id,   //links it to the event
+            frequency: repetition,      //how often it repeats
             interval: 1,
             daysOfWeek: [],
-            endType: "never",
+            endType: "never",  //repeats until the user changes it
             endDate: null,
             occurrenceCount: null,
             createdAt: serverTimestamp(),
@@ -46,31 +42,33 @@ async function createEvent(eventData, options = {}) {
         });
     }
 
-    batch.set(eventReference, {
+    batch.set(eventRef, {   //adds the event to the batch
         ...eventData,
-        repetitionId,
+        repetitionId,      //null if the event does not repeat
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
     });
 
-    if (reminderMinutes !== null) {
-        const reminderReference = doc(
+    if (reminderMinutes !== null) {  //only runs if a reminder was selected
+        const reminderRef = doc(
             collection(db, "reminders")
-        );
+        );     //makes a new reminder document
+
         const startDate = eventData.startAt instanceof Date
             ? eventData.startAt
-            : eventData.startAt.toDate();
+            : eventData.startAt.toDate();   //makes sure the start time is a date
+
         const scheduledDate = new Date(
             startDate.getTime() - reminderMinutes * 60 * 1000
-        );
+        );  //finds when the reminder should be sent
 
-        batch.set(reminderReference, {
-            eventId: eventReference.id,
+        batch.set(reminderRef, {
+            eventId: eventRef.id,     //links the reminder to the event
             occurrenceId: null,
-            userId: eventData.createdBy,
+            userId: eventData.createdBy,  //reminder belongs to the event creator
             minutesBefore: reminderMinutes,
             deliveryMethod: "in-app",
-            status: "pending",
+            status: "pending",      //reminder has not been sent yet
             scheduledFor: Timestamp.fromDate(scheduledDate),
             sentAt: null,
             createdAt: serverTimestamp(),
@@ -78,48 +76,40 @@ async function createEvent(eventData, options = {}) {
         });
     }
 
-    await batch.commit();
+    await batch.commit();   //saves all the documents together
 
-    return eventReference.id;
+    return eventRef.id;      //returns the new event id
 }
 
-
-// Load events created by one user
-async function getUserEvents(userId) {
+async function getUserEvents(userId) {  //gets events created by one user
     const eventsQuery = query(
         eventsCollection,
         where("createdBy", "==", userId)
-    );
+    );    //only looks for events from this user
 
-    const snapshot = await getDocs(eventsQuery);
+    const results = await getDocs(eventsQuery);  //runs the search
 
-    return snapshot.docs.map((eventDocument) => ({
-        id: eventDocument.id,
-        ...eventDocument.data()
+    return results.docs.map((event) => ({
+        id: event.id,     //adds the document id
+        ...event.data()  //adds the rest of the event data
     }));
 }
 
+async function updateEvent(eventId, changes) {    //updates an event
+    const eventRef = doc(db, "events", eventId);  //finds the event by its id
 
-// Update an existing event
-async function updateEvent(eventId, changes) {
-    const eventReference = doc(db, "events", eventId);
-
-    await updateDoc(eventReference, {
+    await updateDoc(eventRef, {
         ...changes,
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp()     //saves the time of the update
     });
 }
 
+async function removeEvent(eventId) {  //deletes an event
+    const eventRef = doc(db, "events", eventId);      //finds the event by its id
 
-// Delete an existing event
-async function removeEvent(eventId) {
-    const eventReference = doc(db, "events", eventId);
-
-    await deleteDoc(eventReference);
+    await deleteDoc(eventRef);   //removes it from Firestore
 }
 
-
-// Allow other files to use these functions
 export {
     createEvent,
     getUserEvents,
