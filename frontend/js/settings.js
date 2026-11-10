@@ -1,85 +1,60 @@
-// Import the worldwide timezone list
 import { getTimeZones } from "@vvo/tzdb";
 
-// Import our Google authentication functions
 import { logOut, watchAuthState } from "../../firebase/auth.js";
 import {
     getUserProfile,
     updateUserSettings
 } from "../../firebase/users.js";
+
 import {
     getSavedTheme,
     applyTheme,
     saveTheme
 } from "../theme.js";
 
-// --------------------------------------------------
-// 1. Get the elements from settings.html
-// --------------------------------------------------
+const settingsForm = document.getElementById("settings-form");   //form that holds the settings
 
-const settingsForm = document.getElementById("settings-form");
+const timeZoneSelect = document.getElementById("timezone-select");  //time zone dropdown
+const themeSelect = document.getElementById("theme-select");    //theme dropdown
+const defaultCalendarSelect = document.getElementById("default-calendar");  //default calendar dropdown
 
-const timeZoneSelect = document.getElementById("timezone-select");
-const themeSelect = document.getElementById("theme-select");
-const defaultCalendarSelect = document.getElementById("default-calendar");
+const currentTime = document.getElementById("current-time");   //shows the current time
+const saveStatus = document.getElementById("save-status");  //shows save messages
 
-const currentTime = document.getElementById("current-time");
-const saveStatus = document.getElementById("save-status");
+const profilePhoto = document.getElementById("profile-photo");    //user's Google profile picture
+const profileName = document.getElementById("profile-name");  //user's display name
+const profileEmail = document.getElementById("profile-email");   //user's email address
 
-const profilePhoto = document.getElementById("profile-photo");
-const profileName = document.getElementById("profile-name");
-const profileEmail = document.getElementById("profile-email");
+const signOutButton = document.getElementById("sign-out-button");  //button used to sign out
 
-const signOutButton = document.getElementById("sign-out-button");
-let signedInUser = null;
+let signedInUser = null;    //stores the user after they sign in
 
-
-// --------------------------------------------------
-// 2. Add worldwide timezones to the dropdown
-// --------------------------------------------------
-
-function addTimeZonesToDropdown() {
-    const timeZones = getTimeZones({ includeUtc: true });
+function addTimeZonesToDropdown() {  //adds all time zones to the dropdown
+    const timeZones = getTimeZones({ includeUtc: true });    //also includes UTC in the list
 
     for (const zone of timeZones) {
-        const option = document.createElement("option");
+        const option = document.createElement("option");  //makes a new dropdown option
 
-        // This is the timezone value that will be saved
-        option.value = zone.name;
+        option.value = zone.name;    //value that gets saved
 
-        // Use the timezone name if no city is available
-        let location = zone.name;
+        let location = zone.name;  //uses the time zone name by default
 
-        // Use city names when the timezone has them
         if (zone.mainCities && zone.mainCities.length > 0) {
-            location = zone.mainCities.join(", ");
+            location = zone.mainCities.join(", ");   //uses city names when they are available
         }
 
-        // This is what the user sees in the dropdown
         option.textContent =
-            location + " — " + zone.currentTimeFormat;
+            location + " — " + zone.currentTimeFormat;  //text shown inside the dropdown
 
-        timeZoneSelect.appendChild(option);
+        timeZoneSelect.appendChild(option);    //adds the option to the list
     }
 }
 
-
-// --------------------------------------------------
-// 3. Change the page color theme
-// --------------------------------------------------
-
-
-
-// --------------------------------------------------
-// 4. Display the current time
-// --------------------------------------------------
-
-function updateCurrentTime() {
+function updateCurrentTime() {   //updates the clock for the selected time zone
     const selectedTimeZone = timeZoneSelect.value;
 
-    // Do not show a time if no timezone is selected
     if (selectedTimeZone === "") {
-        currentTime.textContent = "";
+        currentTime.textContent = "";  //shows nothing if no time zone is selected
         return;
     }
 
@@ -91,89 +66,78 @@ function updateCurrentTime() {
         };
 
         const dateFormatter =
-            new Intl.DateTimeFormat("en-US", timeOptions);
+            new Intl.DateTimeFormat("en-US", timeOptions);   //creates the date formatter
 
-        const formattedTime = dateFormatter.format(new Date());
+        const formattedTime = dateFormatter.format(new Date());  //formats the current time
 
         currentTime.textContent =
             "Current time: " + formattedTime;
     } catch (error) {
         currentTime.textContent =
-            "Unable to display this timezone.";
+            "Unable to display this timezone.";    //shown if the time zone cannot be used
     }
 }
 
-
-// --------------------------------------------------
-// 5. Load previously saved settings
-// --------------------------------------------------
-
-function loadSavedSettings(profile = null) {
+function loadSavedSettings(profile = null) {  //loads settings from the profile or browser
     let savedTheme =
-       profile?.theme || getSavedTheme();
+        profile?.theme || getSavedTheme();   //uses the cloud theme first
 
     let savedTimeZone =
         profile?.timeZone ||
-        localStorage.getItem("timeshift-timezone");
+        localStorage.getItem("timeshift-timezone");  //checks for a saved browser time zone
 
     let savedCalendar =
         profile?.defaultCalendarId ||
-        localStorage.getItem("timeshift-default-calendar");
+        localStorage.getItem("timeshift-default-calendar");    //checks for a saved calendar
 
-    // Use these default values when nothing was saved
     if (!savedTimeZone) {
         savedTimeZone =
-            Intl.DateTimeFormat().resolvedOptions().timeZone;
+            Intl.DateTimeFormat().resolvedOptions().timeZone;  //uses the device time zone by default
     }
 
     if (!savedCalendar) {
-        savedCalendar = "personal";
+        savedCalendar = "personal";    //uses the personal calendar by default
     }
 
-    // Put the saved choices into the dropdowns
     themeSelect.value = savedTheme;
-    timeZoneSelect.value = savedTimeZone;
+    timeZoneSelect.value = savedTimeZone;   //puts the saved choices into the dropdowns
     defaultCalendarSelect.value = savedCalendar;
 
-    applyTheme(savedTheme);
+    applyTheme(savedTheme);  //changes the page to the saved theme
     saveTheme(savedTheme);
+
     localStorage.setItem("timeshift-timezone", savedTimeZone);
+
     localStorage.setItem(
         "timeshift-default-calendar",
         savedCalendar
-    );
-    updateCurrentTime();
+    );    //keeps a copy of the calendar choice in the browser
+
+    updateCurrentTime();  //updates the clock using the saved time zone
 }
 
-
-// --------------------------------------------------
-// 6. Save settings in the browser
-// --------------------------------------------------
-
-async function saveSettings(event) {
-    // Stop the form from refreshing the page
-    event.preventDefault();
+async function saveSettings(event) {    //saves the user's selected settings
+    event.preventDefault();  //stops the form from refreshing the page
 
     const selectedTheme = themeSelect.value;
     const selectedTimeZone = timeZoneSelect.value;
     const selectedCalendar = defaultCalendarSelect.value;
 
-
     localStorage.setItem(
         "timeshift-timezone",
         selectedTimeZone
-    );
+    );   //saves the time zone in the browser
 
     localStorage.setItem(
         "timeshift-default-calendar",
         selectedCalendar
-    );
+    );  //saves the default calendar in the browser
 
-    saveTheme(selectedTheme);
+    saveTheme(selectedTheme);    //saves and applies the selected theme
 
     if (!signedInUser) {
         saveStatus.textContent =
-            "Please sign in before saving settings.";
+            "Please sign in before saving settings.";  //cloud settings need a signed-in user
         return;
     }
 
@@ -184,99 +148,78 @@ async function saveSettings(event) {
             timeZone: selectedTimeZone,
             theme: selectedTheme,
             defaultCalendarId: selectedCalendar
-        });
+        });   //saves the settings to the user's Firestore profile
 
         saveStatus.textContent = "Settings saved!";
     } catch (error) {
         console.error("Unable to save settings:", error);
+
         saveStatus.textContent =
-            "Settings could not be saved. Please try again.";
+            "Settings could not be saved. Please try again.";    //shown if the save fails
     }
 }
 
-
-// --------------------------------------------------
-// 7. Display the signed-in Google user
-// --------------------------------------------------
-
-async function displayGoogleUser(user) {
-    // Send the user to login if they are not signed in
+async function displayGoogleUser(user) {  //displays the signed-in user's information
     if (!user) {
-        window.location.replace("../index.html");
+        window.location.replace("../index.html");   //returns to login if no user is signed in
         return;
     }
 
-    signedInUser = user;
+    signedInUser = user;  //keeps the user available when settings are saved
 
-    // Display the user's name
     if (user.displayName) {
         profileName.value = user.displayName;
     } else {
-        profileName.value = "TimeShift User";
+        profileName.value = "TimeShift User";    //uses a default name if none is available
     }
 
-    // Display the user's email
     if (user.email) {
         profileEmail.value = user.email;
     } else {
-        profileEmail.value = "";
+        profileEmail.value = "";  //keeps the field empty if there is no email
     }
 
-    // Display the user's Google profile photo
     if (user.photoURL) {
         profilePhoto.src = user.photoURL;
         profilePhoto.alt =
             profileName.value + " profile photo";
 
-        profilePhoto.style.display = "block";
+        profilePhoto.style.display = "block";   //shows the Google profile picture
     } else {
-        profilePhoto.style.display = "none";
+        profilePhoto.style.display = "none";  //hides the image if there is no picture
     }
 
     try {
-        const profile = await getUserProfile(user.uid);
+        const profile = await getUserProfile(user.uid);    //loads the user's Firestore profile
 
         if (profile) {
-            loadSavedSettings(profile);
+            loadSavedSettings(profile);  //uses the settings stored in Firestore
         }
     } catch (error) {
         console.error("Unable to load saved settings:", error);
+
         saveStatus.textContent =
-            "Cloud settings could not be loaded.";
+            "Cloud settings could not be loaded.";   //browser settings can still be used
     }
 }
 
-
-// --------------------------------------------------
-// 8. Sign the user out
-// --------------------------------------------------
-
-async function signOutUser() {
+async function signOutUser() {  //signs out the current user
     await logOut();
-    window.location.replace("../index.html");
+
+    window.location.replace("../index.html");    //returns to the login page
 }
 
+addTimeZonesToDropdown();  //loads all time zone options
+loadSavedSettings();    //loads the browser settings while the profile loads
 
-// --------------------------------------------------
-// 9. Start the Settings page
-// --------------------------------------------------
-
-// Add the timezone options first
-addTimeZonesToDropdown();
-
-// Load the user's saved choices
-loadSavedSettings();
-
-// Watch for changes made by the user
 themeSelect.addEventListener("change", () => {
-    applyTheme(themeSelect.value);
+    applyTheme(themeSelect.value);  //previews the theme as soon as it is selected
 });
-timeZoneSelect.addEventListener("change", updateCurrentTime);
-settingsForm.addEventListener("submit", saveSettings);
-signOutButton.addEventListener("click", signOutUser);
 
-// Update the displayed clock every second
-setInterval(updateCurrentTime, 1000);
+timeZoneSelect.addEventListener("change", updateCurrentTime);   //updates the clock after a change
+settingsForm.addEventListener("submit", saveSettings);  //saves the selected settings
+signOutButton.addEventListener("click", signOutUser);    //signs the user out
 
-// Get the currently signed-in Google user
-watchAuthState(displayGoogleUser);
+setInterval(updateCurrentTime, 1000);  //updates the displayed time every second
+
+watchAuthState(displayGoogleUser);    //loads the signed-in user
