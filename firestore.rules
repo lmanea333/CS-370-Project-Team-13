@@ -3,26 +3,26 @@ rules_version = '2';
 service cloud.firestore {
     match /databases/{database}/documents {
 
-        // Checks whether the user signed in with Firebase
+        //check that the user is logged in
         function signedIn() {
             return request.auth != null;
         }
 
+        //check whether the current user owns an event
         function ownsEvent(eventId) {
             return signedIn()
-                && get(
-                    /databases/$(database)/documents/events/$(eventId)
-                ).data.createdBy == request.auth.uid;
+                && get(/databases/$(database)/documents/events/$(eventId))
+                    .data.createdBy == request.auth.uid;
         }
 
+        //used when checking an event after a write
         function ownsEventAfterWrite(eventId) {
             return signedIn()
-                && getAfter(
-                    /databases/$(database)/documents/events/$(eventId)
-                ).data.createdBy == request.auth.uid;
+                && getAfter(/databases/$(database)/documents/events/$(eventId))
+                    .data.createdBy == request.auth.uid;
         }
 
-        // Each user can only access their own profile
+        //users should only be able to access their own account
         match /users/{userId} {
             allow create: if signedIn()
                 && request.auth.uid == userId;
@@ -31,28 +31,23 @@ service cloud.firestore {
                 && request.auth.uid == userId;
         }
 
-        // Users can create and access their own events
+        //event permissions
         match /events/{eventId} {
             allow create: if signedIn()
-                && request.resource.data.createdBy
-                    == request.auth.uid;
+                && request.resource.data.createdBy == request.auth.uid;
 
             allow read: if signedIn()
-                && resource.data.createdBy
-                    == request.auth.uid;
+                && resource.data.createdBy == request.auth.uid;
 
             allow update: if signedIn()
-                && resource.data.createdBy
-                    == request.auth.uid
-                && request.resource.data.createdBy
-                    == request.auth.uid;
+                && resource.data.createdBy == request.auth.uid
+                && request.resource.data.createdBy == request.auth.uid;
 
             allow delete: if signedIn()
-                && resource.data.createdBy
-                    == request.auth.uid;
+                && resource.data.createdBy == request.auth.uid;
         }
 
-        // Calendar documents are private until shared-calendar support is added.
+        //for now, calendars can only be accessed by their owner
         match /calendars/{calendarId} {
             allow create: if signedIn()
                 && request.resource.data.ownerId == request.auth.uid;
@@ -65,7 +60,7 @@ service cloud.firestore {
                 && request.resource.data.ownerId == request.auth.uid;
         }
 
-        // Reminder access is limited to the user who owns the reminder.
+        //users can only access their own reminders
         match /reminders/{reminderId} {
             allow create: if signedIn()
                 && request.resource.data.userId == request.auth.uid
@@ -80,7 +75,7 @@ service cloud.firestore {
                 && request.resource.data.eventId == resource.data.eventId;
         }
 
-        // A repetition can only be accessed through an event the user owns.
+        //repetitions belong to an event, so the user must own that event
         match /repetitions/{repetitionId} {
             allow create: if ownsEventAfterWrite(
                 request.resource.data.eventId
@@ -91,11 +86,10 @@ service cloud.firestore {
             );
 
             allow update: if ownsEvent(resource.data.eventId)
-                && request.resource.data.eventId
-                    == resource.data.eventId;
+                && request.resource.data.eventId == resource.data.eventId;
         }
 
-        // Block anything that was not explicitly allowed
+        //deny access to anything that does not have a rule above
         match /{document=**} {
             allow read, write: if false;
         }
