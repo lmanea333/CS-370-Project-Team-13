@@ -1,13 +1,14 @@
 // Firebase tools needed for event documents
 import {
-    addDoc,
     collection,
     deleteDoc,
     doc,
     getDocs,
     query,
     serverTimestamp,
+    Timestamp,
     updateDoc,
+    writeBatch,
     where
 } from "firebase/firestore";
 
@@ -19,14 +20,67 @@ const eventsCollection = collection(db, "events");
 
 
 // Create and save a new event
-async function createEvent(eventData) {
-    const documentReference = await addDoc(eventsCollection, {
+async function createEvent(eventData, options = {}) {
+    const eventReference = doc(eventsCollection);
+    const batch = writeBatch(db);
+    const repetition = options.repetition ?? "none";
+    const reminderMinutes = options.reminderMinutes ?? null;
+    let repetitionId = null;
+
+    if (repetition !== "none") {
+        const repetitionReference = doc(
+            collection(db, "repetitions")
+        );
+        repetitionId = repetitionReference.id;
+
+        batch.set(repetitionReference, {
+            eventId: eventReference.id,
+            frequency: repetition,
+            interval: 1,
+            daysOfWeek: [],
+            endType: "never",
+            endDate: null,
+            occurrenceCount: null,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+        });
+    }
+
+    batch.set(eventReference, {
         ...eventData,
+        repetitionId,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
     });
 
-    return documentReference.id;
+    if (reminderMinutes !== null) {
+        const reminderReference = doc(
+            collection(db, "reminders")
+        );
+        const startDate = eventData.startAt instanceof Date
+            ? eventData.startAt
+            : eventData.startAt.toDate();
+        const scheduledDate = new Date(
+            startDate.getTime() - reminderMinutes * 60 * 1000
+        );
+
+        batch.set(reminderReference, {
+            eventId: eventReference.id,
+            occurrenceId: null,
+            userId: eventData.createdBy,
+            minutesBefore: reminderMinutes,
+            deliveryMethod: "in-app",
+            status: "pending",
+            scheduledFor: Timestamp.fromDate(scheduledDate),
+            sentAt: null,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+        });
+    }
+
+    await batch.commit();
+
+    return eventReference.id;
 }
 
 
