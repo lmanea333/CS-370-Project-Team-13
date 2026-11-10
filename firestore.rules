@@ -1,96 +1,176 @@
+//sets the Firestore security rules language version
 rules_version = '2';
 
+//starts the rules for the Cloud Firestore service
 service cloud.firestore {
+
+    //applies these rules to every database and its documents
     match /databases/{database}/documents {
 
-        //check that the user is logged in
+        //checks whether the user is currently logged in
         function signedIn() {
+
+            //request.auth is null when there is no logged-in user
             return request.auth != null;
         }
 
-        //check whether the current user owns an event
+        //checks whether the logged-in user owns an event
         function ownsEvent(eventId) {
+
+            //first makes sure that a user is logged in
             return signedIn()
+
+                //gets the event document using the provided event ID
                 && get(/databases/$(database)/documents/events/$(eventId))
+
+                    //compares the event creator's ID with the logged-in user's ID
                     .data.createdBy == request.auth.uid;
         }
 
-        //used when checking an event after a write
+        //checks event ownership using the data after a write
         function ownsEventAfterWrite(eventId) {
+
+            //first makes sure that a user is logged in
             return signedIn()
+
+                //gets the event as it will appear after the write finishes
                 && getAfter(/databases/$(database)/documents/events/$(eventId))
+
+                    //checks that the logged-in user created the event
                     .data.createdBy == request.auth.uid;
         }
 
-        //users should only be able to access their own account
+        //sets the rules for documents inside the users collection
         match /users/{userId} {
+
+            //allows a logged-in user to create their own user document
             allow create: if signedIn()
+
+                //checks that the document ID matches the logged-in user's ID
                 && request.auth.uid == userId;
 
+            //allows the user to view, change, or delete their own account
             allow read, update, delete: if signedIn()
+
+                //prevents the user from accessing another user's document
                 && request.auth.uid == userId;
         }
 
-        //event permissions
+        //sets the rules for documents inside the events collection
         match /events/{eventId} {
+
+            //allows a logged-in user to create an event
             allow create: if signedIn()
+
+                //requires the new event's createdBy field to match the user
                 && request.resource.data.createdBy == request.auth.uid;
 
+            //allows the owner of an event to read it
             allow read: if signedIn()
+
+                //resource contains the event data already stored in Firestore
                 && resource.data.createdBy == request.auth.uid;
 
+            //allows the owner of an event to update it
             allow update: if signedIn()
+
+                //checks that the user owns the existing event
                 && resource.data.createdBy == request.auth.uid
+
+                //prevents the createdBy field from being changed to another user
                 && request.resource.data.createdBy == request.auth.uid;
 
+            //allows the owner of an event to delete it
             allow delete: if signedIn()
+
+                //checks the owner of the event before it is deleted
                 && resource.data.createdBy == request.auth.uid;
         }
 
-        //for now, calendars can only be accessed by their owner
+        //sets the rules for documents inside the calendars collection
         match /calendars/{calendarId} {
+
+            //allows a logged-in user to create a calendar
             allow create: if signedIn()
+
+                //requires the new calendar's ownerId to match the user
                 && request.resource.data.ownerId == request.auth.uid;
 
+            //allows the calendar owner to read or delete the calendar
             allow read, delete: if signedIn()
+
+                //checks the ownerId stored in the existing calendar
                 && resource.data.ownerId == request.auth.uid;
 
+            //allows the calendar owner to update the calendar
             allow update: if signedIn()
+
+                //checks that the user owns the current calendar
                 && resource.data.ownerId == request.auth.uid
+
+                //prevents the ownerId from being changed to another user
                 && request.resource.data.ownerId == request.auth.uid;
         }
 
-        //users can only access their own reminders
+        //sets the rules for documents inside the reminders collection
         match /reminders/{reminderId} {
+
+            //allows a logged-in user to create a reminder
             allow create: if signedIn()
+
+                //requires the reminder's userId to match the user
                 && request.resource.data.userId == request.auth.uid
+
+                //requires the user to own the event connected to the reminder
                 && ownsEventAfterWrite(request.resource.data.eventId);
 
+            //allows a user to read or delete their own reminders
             allow read, delete: if signedIn()
+
+                //checks the userId stored in the existing reminder
                 && resource.data.userId == request.auth.uid;
 
+            //allows a user to update their own reminder
             allow update: if signedIn()
+
+                //checks that the user owns the current reminder
                 && resource.data.userId == request.auth.uid
+
+                //prevents the reminder from being assigned to another user
                 && request.resource.data.userId == request.auth.uid
+
+                //prevents the reminder's connected event from being changed
                 && request.resource.data.eventId == resource.data.eventId;
         }
 
-        //repetitions belong to an event, so the user must own that event
+        //sets the rules for documents inside the repetitions collection
         match /repetitions/{repetitionId} {
+
+            //allows a repetition to be created for an event the user owns
             allow create: if ownsEventAfterWrite(
+
+                //gets the event ID from the new repetition document
                 request.resource.data.eventId
             );
 
+            //allows access when the user owns the connected event
             allow read, delete: if ownsEvent(
+
+                //gets the event ID from the existing repetition document
                 resource.data.eventId
             );
 
+            //allows the event owner to update a repetition
             allow update: if ownsEvent(resource.data.eventId)
+
+                //prevents the repetition's connected event from being changed
                 && request.resource.data.eventId == resource.data.eventId;
         }
 
-        //deny access to anything that does not have a rule above
+        //matches any document that was not covered by the rules above
         match /{document=**} {
+
+            //blocks all other read and write requests
             allow read, write: if false;
         }
     }
