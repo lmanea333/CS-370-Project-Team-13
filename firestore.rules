@@ -8,6 +8,20 @@ service cloud.firestore {
             return request.auth != null;
         }
 
+        function ownsEvent(eventId) {
+            return signedIn()
+                && get(
+                    /databases/$(database)/documents/events/$(eventId)
+                ).data.createdBy == request.auth.uid;
+        }
+
+        function ownsEventAfterWrite(eventId) {
+            return signedIn()
+                && getAfter(
+                    /databases/$(database)/documents/events/$(eventId)
+                ).data.createdBy == request.auth.uid;
+        }
+
         // Each user can only access their own profile
         match /users/{userId} {
             allow create: if signedIn()
@@ -36,6 +50,49 @@ service cloud.firestore {
             allow delete: if signedIn()
                 && resource.data.createdBy
                     == request.auth.uid;
+        }
+
+        // Calendar documents are private until shared-calendar support is added.
+        match /calendars/{calendarId} {
+            allow create: if signedIn()
+                && request.resource.data.ownerId == request.auth.uid;
+
+            allow read, delete: if signedIn()
+                && resource.data.ownerId == request.auth.uid;
+
+            allow update: if signedIn()
+                && resource.data.ownerId == request.auth.uid
+                && request.resource.data.ownerId == request.auth.uid;
+        }
+
+        // Reminder access is limited to the user who owns the reminder.
+        match /reminders/{reminderId} {
+            allow create: if signedIn()
+                && request.resource.data.userId == request.auth.uid
+                && ownsEventAfterWrite(request.resource.data.eventId);
+
+            allow read, delete: if signedIn()
+                && resource.data.userId == request.auth.uid;
+
+            allow update: if signedIn()
+                && resource.data.userId == request.auth.uid
+                && request.resource.data.userId == request.auth.uid
+                && request.resource.data.eventId == resource.data.eventId;
+        }
+
+        // A repetition can only be accessed through an event the user owns.
+        match /repetitions/{repetitionId} {
+            allow create: if ownsEventAfterWrite(
+                request.resource.data.eventId
+            );
+
+            allow read, delete: if ownsEvent(
+                resource.data.eventId
+            );
+
+            allow update: if ownsEvent(resource.data.eventId)
+                && request.resource.data.eventId
+                    == resource.data.eventId;
         }
 
         // Block anything that was not explicitly allowed
