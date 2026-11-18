@@ -3,6 +3,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../firebase/config.js";
 import { getUserEvents } from "../../firebase/events.js";
 import { openEventDetails } from "../event-details.js";
+import { addRepeatInfo, getOccurrencesBetween } from "../repeats.js";
 
 
 // ---------- Calendar elements ----------
@@ -39,6 +40,9 @@ const today = new Date();
 let currentMonth = today.getMonth();
 let currentYear = today.getFullYear();
 let savedEvents = [];
+
+// events for the month on screen (includes repeats)
+let monthEvents = [];
 
 
 // ---------- Timezone helpers ----------
@@ -92,9 +96,9 @@ function formatEventTime(event) {
 // ---------- Find events for one date ----------
 
 function getEventsForDate(year, month, day) {
-    return savedEvents.filter((event) => {
+    return monthEvents.filter((event) => {        
         const eventDate = getEventDateParts(event);
-
+        
         return (
             eventDate.year === year &&
             eventDate.month === month &&
@@ -133,6 +137,22 @@ function createEventLabel(event) {
 function renderCalendar(month, year) {
     calendarDates.replaceChildren();
     monthYear.textContent = `${months[month]} ${year}`;
+
+    // get every event (and repeat) that happens this month.
+    // 2 extra days on each side because of time zones
+    const rangeStart = new Date(year, month, 1 - 2);
+    const rangeEnd = new Date(year, month + 1, 1 + 2);
+
+    monthEvents = [];
+    savedEvents.forEach((event) => {
+        const copies = getOccurrencesBetween(event, rangeStart, rangeEnd);
+        monthEvents.push(...copies);
+    });
+
+    // earliest first so each day is in order
+    monthEvents.sort((first, second) => {
+        return getEventDate(first) - getEventDate(second);
+    });
 
     const firstDay =
         new Date(year, month, 1).getDay();
@@ -188,6 +208,9 @@ function renderCalendar(month, year) {
 async function loadEvents(userId) {
     try {
         savedEvents = await getUserEvents(userId);
+        
+        // finds out which events repeat (daily, weekly, etc)
+        await addRepeatInfo(savedEvents);
 
         savedEvents.sort((firstEvent, secondEvent) => {
             return (
