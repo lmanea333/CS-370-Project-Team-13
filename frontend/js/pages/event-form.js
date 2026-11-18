@@ -79,6 +79,16 @@ const deleteButton =
 // null = making a new event, otherwise the event being edited
 let editingEvent = null;
 
+// Repeat dropdown + the "How many times?" box under it
+const repeatSelect =
+    document.getElementById("event-repeat");
+
+const repeatCountField =
+    document.getElementById("repeat-count-field");
+
+const repeatCountInput =
+    document.getElementById("event-repeat-count");
+
 
 // --------------------------------------------------
 // 2. Create today's date in the format HTML needs
@@ -375,10 +385,15 @@ async function submitEventForm(event) {
         const reminderMinutes = reminderValue === "none"
             ? null
             : Number(reminderValue);
+
+        // how many times it repeats (null if it doesn't repeat)
+        const repeatCount = repetition === "none"
+            ? null
+            : Number(formData.get("repeatCount"));
         
         // editing an event that already exists
         if (editingEvent) {
-            await saveEditedEvent(eventModel, repetition, reminderMinutes);
+            await saveEditedEvent(eventModel, repetition, reminderMinutes, repeatCount);            
             return;
         }
 
@@ -387,7 +402,8 @@ async function submitEventForm(event) {
             eventModel.toFirestore(),
             {
                 repetition,
-                reminderMinutes
+                reminderMinutes,
+                repeatCount
             }
         );
 
@@ -407,6 +423,7 @@ async function submitEventForm(event) {
         eventForm.reset();
         dateInput.value = getToday();
         selectUserTimeZone();
+        showOrHideRepeatCount();
 
         // Briefly show the success message, then close
         setTimeout(() => {
@@ -431,6 +448,15 @@ function setNewMode() {
     formHeading.textContent = "New Event";
     saveButton.textContent = "Save Event";
     deleteButton.hidden = true;
+    showOrHideRepeatCount();
+}
+
+// Only show "How many times?" when the event repeats
+function showOrHideRepeatCount() {
+    const repeats = repeatSelect.value !== "none";
+
+    repeatCountField.hidden = !repeats;
+    repeatCountInput.required = repeats;
 }
 
 // Firebase gives back a Timestamp, so turn it into a Date
@@ -453,6 +479,7 @@ async function openEditForm(event) {
     formHeading.textContent = "Edit Event";
     saveButton.textContent = "Save Changes";
     deleteButton.hidden = false;
+    showOrHideRepeatCount();
 
     const start = toDate(event.startAt);
     const end = toDate(event.endAt);
@@ -478,10 +505,18 @@ async function openEditForm(event) {
     try {
         if (event.repetitionId) {
             const repetitions = await getEventRepetitions(event.id);
-            if (repetitions[0]) {
-                document.getElementById("event-repeat").value =
+                if (repetitions[0]) {
+                    document.getElementById("event-repeat").value =
                     repetitions[0].frequency;
+
+                // old events might not have a count saved
+                if (repetitions[0].occurrenceCount) {
+                    repeatCountInput.value = repetitions[0].occurrenceCount;
+                }
             }
+        }
+
+        showOrHideRepeatCount();
         }
 
         const reminders = await getUserReminders(auth.currentUser.uid);
@@ -496,8 +531,7 @@ async function openEditForm(event) {
 }
 
 // Saves the changes to Firestore
-async function saveEditedEvent(eventModel, repetition, reminderMinutes) {
-    // only the fields from the form (not createdBy, createdAt, etc)
+async function saveEditedEvent(eventModel, repetition, reminderMinutes, repeatCount) {    // only the fields from the form (not createdBy, createdAt, etc)
     const changes = {
         calendarId: eventModel.calendarId,
         title: eventModel.title,
@@ -514,6 +548,7 @@ async function saveEditedEvent(eventModel, repetition, reminderMinutes) {
     await editEvent(editingEvent.id, changes, {
         repetition: repetition,
         reminderMinutes: reminderMinutes,
+        repeatCount: repeatCount,
         oldRepetitionId: editingEvent.repetitionId,
         userId: auth.currentUser.uid
     });
@@ -609,5 +644,11 @@ window.addEventListener("timeshift:edit-event", (event) => {
 deleteButton.addEventListener(
     "click",
     deleteFromForm
+);
+
+// Show "How many times?" when Repeat changes
+repeatSelect.addEventListener(
+    "change",
+    showOrHideRepeatCount
 );
 
