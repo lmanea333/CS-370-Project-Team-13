@@ -111,9 +111,99 @@ async function removeEvent(eventId) {  //deletes an event
     await deleteDoc(eventRef);   //removes it from Firestore
 }
 
+async function editEvent(eventId, changes, options = {}) {    //saves changes to an event + its repeat/reminder
+    const eventRef = doc(db, "events", eventId);  //finds the event by its id
+    const batch = writeBatch(db);  //does everything at once
+    const repetition = options.repetition ?? "none";
+    const reminderMinutes = options.reminderMinutes ?? null;
+    let repetitionId = null;
+
+    if (options.oldRepetitionId) {     //deletes the old repeat info
+        batch.delete(doc(db, "repetitions", options.oldRepetitionId));
+    }
+
+    if (repetition !== "none") {   //makes new repeat info if needed
+        const repetitionRef = doc(collection(db, "repetitions"));
+        repetitionId = repetitionRef.id;
+
+        batch.set(repetitionRef, {
+            eventId: eventId,
+            frequency: repetition,
+            interval: 1,
+            daysOfWeek: [],
+            endType: "never",
+            endDate: null,
+            occurrenceCount: null,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+        });
+    }
+
+    batch.update(eventRef, {    //updates the event itself
+        ...changes,
+        repetitionId,
+        updatedAt: serverTimestamp()
+    });
+
+    //old reminders are deleted because the event time might have changed
+    const reminders = await getUserReminders(options.userId);
+    reminders
+        .filter((reminder) => reminder.eventId === eventId)
+        .forEach((reminder) => {
+            batch.delete(doc(db, "reminders", reminder.id));
+        });
+
+    if (reminderMinutes !== null) {   //makes a new reminder if one was picked
+        const reminderRef = doc(collection(db, "reminders"));
+        const startDate = changes.startAt instanceof Date
+            ? changes.startAt
+            : changes.startAt.toDate();
+
+        const scheduledDate = new Date(
+            startDate.getTime() - reminderMinutes * 60 * 1000
+        );
+
+        batch.set(reminderRef, {
+            eventId: eventId,
+            occurrenceId: null,
+            userId: options.userId,
+            minutesBefore: reminderMinutes,
+            deliveryMethod: "in-app",
+            status: "pending",
+            scheduledFor: Timestamp.fromDate(scheduledDate),
+            sentAt: null,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+        });
+    }
+
+    await batch.commit();   //saves all of it
+}
+
+async function deleteEventAndExtras(event, userId) {   //deletes an event + its repeat and reminders
+    const batch = writeBatch(db);
+
+    if (event.repetitionId) {     //removes the repeat info
+        batch.delete(doc(db, "repetitions", event.repetitionId));
+    }
+
+    const reminders = await getUserReminders(userId);   //removes reminders for this event
+    reminders
+        .filter((reminder) => reminder.eventId === event.id)
+        .forEach((reminder) => {
+            batch.delete(doc(db, "reminders", reminder.id));
+        });
+
+    batch.delete(doc(db, "events", event.id));  //removes the event
+
+    await batch.commit();
+}
+
 export {
     createEvent,
     getUserEvents,
     updateEvent,
-    removeEvent
+    removeEvent,
+    editEvent,
+    deleteEventAndExtras
 };
