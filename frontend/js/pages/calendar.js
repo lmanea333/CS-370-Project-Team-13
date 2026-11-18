@@ -122,7 +122,6 @@ function createEventLabel(event) {
 
         // show the event details popup
         openEventDetails(event);
-        );
     });
 
     return eventLabel;
