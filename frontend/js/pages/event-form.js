@@ -501,12 +501,13 @@ async function openEditForm(event) {
 
     eventDialog.showModal();
 
-    // repeat + reminder are saved separately so load them
+       // repeat + reminder are saved separately so load them
     try {
         if (event.repetitionId) {
             const repetitions = await getEventRepetitions(event.id);
-                if (repetitions[0]) {
-                    document.getElementById("event-repeat").value =
+
+            if (repetitions[0]) {
+                document.getElementById("event-repeat").value =
                     repetitions[0].frequency;
 
                 // old events might not have a count saved
@@ -517,7 +518,6 @@ async function openEditForm(event) {
         }
 
         showOrHideRepeatCount();
-        }
 
         const reminders = await getUserReminders(auth.currentUser.uid);
         const reminder = reminders.find((item) => item.eventId === event.id);
