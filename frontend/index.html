@@ -3,28 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <title>TimeShift</title>
-
-  <link rel="stylesheet" href="./css/theme.css">
-<link rel="stylesheet" href="./css/styles.css">
-
-<script
-    type="module"
-    src="./js/theme.js"
-></script>
-<script type="module" src="./js/pages/login.js" defer></script>
+    <title>TimeShift - Log In</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <script type="module" src="./js/theme.js"></script>
+    <script type="module" src="./js/pages/login.js"></script>
 </head>
 <body>
-    <main>
+
+    <div class="login-box">
         <h1>TimeShift</h1>
-        <p>Schedule events across time zones.</p>
+        <p>A calendar that converts events from any time zone into your own.</p>
 
-        <button id="google-sign-in" type="button">
-            Sign in with Google
-        </button>
+        <button id="google-sign-in" class="btn" type="button">Sign in with Google</button>
 
-        <p id="status">Firebase is not connected yet.</p>
-    </main>
+        <p id="status"></p>
+    </div>
+
+    <footer>CS 370 Team 13</footer>
+
 </body>
 </html>
