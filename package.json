@@ -1,10 +1,11 @@
 {
+  "_comment": "This file lists the project's dependencies and available commands",
   "name": "cs-370-project-team-13",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --test",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"

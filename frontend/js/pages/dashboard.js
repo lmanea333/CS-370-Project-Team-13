@@ -1,7 +1,7 @@
 // Import the Google authentication functions
 import { logOut, watchAuthState } from "../../firebase/auth.js";
-import { auth } from "../../firebase/config.js";
 import { getUserEvents } from "../../firebase/events.js";
+import { getUserProfile } from "../../firebase/users.js";
 
 
 // --------------------------------------------------
@@ -52,24 +52,7 @@ timeZoneDisplay.textContent = userTimeZone;
 // --------------------------------------------------
 
 let events = [];
-// Load the signed-in user's events from Firebase
-async function loadUserEvents(userId) {
-    try {
-        const savedEvents = await getUserEvents(userId);
 
-        events = savedEvents.map((event) => ({
-            ...event,
-            startAt: event.startAt?.toDate
-                ? event.startAt.toDate()
-                : new Date(event.startAt)
-        }));
-
-        displayEvents();
-
-    } catch (error) {
-        console.error("Unable to load dashboard events:", error);
-    }
-}
 
 
 // --------------------------------------------------
@@ -77,17 +60,17 @@ async function loadUserEvents(userId) {
 // --------------------------------------------------
 
 function getDateKey(date) {
-    const year = date.getFullYear();
+    const parts = new Intl.DateTimeFormat("en-CA", {
+        timeZone: userTimeZone,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+    }).formatToParts(date);
 
-    const month = String(
-        date.getMonth() + 1
-    ).padStart(2, "0");
+    const value = (name) =>
+        parts.find((part) => part.type === name).value;
 
-    const day = String(
-        date.getDate()
-    ).padStart(2, "0");
-
-    return year + "-" + month + "-" + day;
+    return `${value("year")}-${value("month")}-${value("day")}`;
 }
 
 function getDateLabel(date) {
@@ -107,7 +90,8 @@ function getDateLabel(date) {
     const dateOptions = {
         weekday: "long",
         month: "long",
-        day: "numeric"
+        day: "numeric",
+        timeZone: userTimeZone
     };
 
     return new Intl.DateTimeFormat(
@@ -304,12 +288,42 @@ function displayEvents() {
     }
 }
 
+async function loadDashboardEvents(userId) {
+    try {
+        const savedEvents = await getUserEvents(userId);
+
+        events = savedEvents.map((event) => ({
+            ...event,
+            startAt: event.startAt?.toDate
+                ? event.startAt.toDate()
+                : new Date(event.startAt),
+            endAt: event.endAt?.toDate
+                ? event.endAt.toDate()
+                : event.endAt
+                    ? new Date(event.endAt)
+                    : null
+        }));
+
+        displayEvents();
+    } catch (error) {
+        console.error("Unable to load dashboard events:", error);
+        events = [];
+        displayEvents();
+
+        const heading = emptyEvents.querySelector("h3");
+        const message = emptyEvents.querySelector("p");
+
+        heading.textContent = "Events could not be loaded";
+        message.textContent = "Please refresh the page and try again.";
+    }
+}
+
 
 // --------------------------------------------------
 // 9. Display the signed-in user's name
 // --------------------------------------------------
 
-function displayUser(user) {
+async function displayUser(user) {
     // Return to login if nobody is signed in
     if (!user) {
         window.location.href = "../index.html";
@@ -325,6 +339,23 @@ function displayUser(user) {
     } else {
         greeting.textContent = "Your schedule";
     }
+
+    try {
+        const profile = await getUserProfile(user.uid);
+
+        if (profile?.timeZone) {
+            userTimeZone = profile.timeZone;
+            localStorage.setItem(
+                "timeshift-timezone",
+                userTimeZone
+            );
+            timeZoneDisplay.textContent = userTimeZone;
+        }
+    } catch (error) {
+        console.error("Unable to load user settings:", error);
+    }
+
+    await loadDashboardEvents(user.uid);
 }
 
 
@@ -333,9 +364,7 @@ function displayUser(user) {
 // --------------------------------------------------
 
 function openNewEventForm() {
-    window.alert(
-        "The New Event popup will be connected next."
-    );
+    window.location.href = "./calendar.html";
 }
 
 
@@ -353,13 +382,7 @@ async function signOutUser() {
 // 12. Start the dashboard
 // --------------------------------------------------
 
-watchAuthState((user) => {
-    displayUser(user);
-
-    if (user) {
-        loadUserEvents(user.uid);
-    }
-});
+watchAuthState(displayUser);
 
 eventFilter.addEventListener("change", displayEvents);
 newEventButton.addEventListener("click", openNewEventForm);

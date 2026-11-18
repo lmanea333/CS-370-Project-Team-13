@@ -336,10 +336,20 @@ async function submitEventForm(event) {
 
         // Create the Event model
         const eventModel = createEventDraft();
+        const formData = new FormData(eventForm);
+        const repetition = formData.get("repetition");
+        const reminderValue = formData.get("reminderMinutes");
+        const reminderMinutes = reminderValue === "none"
+            ? null
+            : Number(reminderValue);
 
         // Convert the model into Firestore data and save it
         const eventId = await createEvent(
-            eventModel.toFirestore()
+            eventModel.toFirestore(),
+            {
+                repetition,
+                reminderMinutes
+            }
         );
 
         statusMessage.textContent = "Event saved!";

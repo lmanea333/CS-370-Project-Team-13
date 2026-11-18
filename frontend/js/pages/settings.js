@@ -4,6 +4,10 @@ import { getTimeZones } from "@vvo/tzdb";
 // Import our Google authentication functions
 import { logOut, watchAuthState } from "../../firebase/auth.js";
 import {
+    getUserProfile,
+    updateUserSettings
+} from "../../firebase/users.js";
+import {
     getSavedTheme,
     applyTheme,
     saveTheme
@@ -27,6 +31,7 @@ const profileName = document.getElementById("profile-name");
 const profileEmail = document.getElementById("profile-email");
 
 const signOutButton = document.getElementById("sign-out-button");
+let signedInUser = null;
 
 
 // --------------------------------------------------
@@ -103,14 +108,16 @@ function updateCurrentTime() {
 // 5. Load previously saved settings
 // --------------------------------------------------
 
-function loadSavedSettings() {
+function loadSavedSettings(profile = null) {
     let savedTheme =
-       getSavedTheme();
+       profile?.theme || getSavedTheme();
 
     let savedTimeZone =
+        profile?.timeZone ||
         localStorage.getItem("timeshift-timezone");
 
     let savedCalendar =
+        profile?.defaultCalendarId ||
         localStorage.getItem("timeshift-default-calendar");
 
     // Use these default values when nothing was saved
@@ -129,6 +136,12 @@ function loadSavedSettings() {
     defaultCalendarSelect.value = savedCalendar;
 
     applyTheme(savedTheme);
+    saveTheme(savedTheme);
+    localStorage.setItem("timeshift-timezone", savedTimeZone);
+    localStorage.setItem(
+        "timeshift-default-calendar",
+        savedCalendar
+    );
     updateCurrentTime();
 }
 
@@ -137,7 +150,7 @@ function loadSavedSettings() {
 // 6. Save settings in the browser
 // --------------------------------------------------
 
-function saveSettings(event) {
+async function saveSettings(event) {
     // Stop the form from refreshing the page
     event.preventDefault();
 
@@ -158,7 +171,27 @@ function saveSettings(event) {
 
     saveTheme(selectedTheme);
 
-    saveStatus.textContent = "Settings saved!";
+    if (!signedInUser) {
+        saveStatus.textContent =
+            "Please sign in before saving settings.";
+        return;
+    }
+
+    try {
+        saveStatus.textContent = "Saving settings...";
+
+        await updateUserSettings(signedInUser.uid, {
+            timeZone: selectedTimeZone,
+            theme: selectedTheme,
+            defaultCalendarId: selectedCalendar
+        });
+
+        saveStatus.textContent = "Settings saved!";
+    } catch (error) {
+        console.error("Unable to save settings:", error);
+        saveStatus.textContent =
+            "Settings could not be saved. Please try again.";
+    }
 }
 
 
@@ -166,12 +199,14 @@ function saveSettings(event) {
 // 7. Display the signed-in Google user
 // --------------------------------------------------
 
-function displayGoogleUser(user) {
+async function displayGoogleUser(user) {
     // Send the user to login if they are not signed in
     if (!user) {
         window.location.replace("../index.html");
         return;
     }
+
+    signedInUser = user;
 
     // Display the user's name
     if (user.displayName) {
@@ -196,6 +231,18 @@ function displayGoogleUser(user) {
         profilePhoto.style.display = "block";
     } else {
         profilePhoto.style.display = "none";
+    }
+
+    try {
+        const profile = await getUserProfile(user.uid);
+
+        if (profile) {
+            loadSavedSettings(profile);
+        }
+    } catch (error) {
+        console.error("Unable to load saved settings:", error);
+        saveStatus.textContent =
+            "Cloud settings could not be loaded.";
     }
 }
 
