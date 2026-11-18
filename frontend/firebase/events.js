@@ -12,6 +12,7 @@ import {
 } from "firebase/firestore";
 
 import { db } from "./config.js";
+import { getUserReminders } from "./reminders.js";
 
 const eventsCollection = collection(db, "events");   //reference to the events collection
 
