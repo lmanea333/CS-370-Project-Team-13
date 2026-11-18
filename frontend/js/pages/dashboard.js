@@ -201,7 +201,7 @@ date.textContent = new Intl.DateTimeFormat("en-US", {
 
     if (event.location) {
         informationText =
-            informationText + " · " + event.location;
+            informationText + " - " + event.location;
     }
 
     eventInformation.textContent = informationText;
@@ -387,5 +387,3 @@ watchAuthState(displayUser);
 eventFilter.addEventListener("change", displayEvents);
 newEventButton.addEventListener("click", openNewEventForm);
 signOutButton.addEventListener("click", signOutUser);
-
-displayEvents();

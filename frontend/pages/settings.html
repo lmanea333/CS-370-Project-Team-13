@@ -1,196 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Settings | TimeShift</title>
-
-    <!-- Settings page design -->
-    <link rel="stylesheet" href="../css/settings.css">
-    <link rel="stylesheet" href="../css/theme.css">
-    <script
-    type="module"
-    src="../js/theme.js"
-></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Settings - TimeShift</title>
+    <link rel="icon" href="../images/globe.svg">
+    <link rel="stylesheet" href="../css/style.css">
+    <script type="module" src="../js/theme.js"></script>
 </head>
-
 <body>
 
-    <!-- Top navigation bar -->
-    <header class="settings-navigation">
-        <a class="settings-logo" href="./dashboard.html">
-            TimeShift
-        </a>
-
-        <nav class="settings-navigation-links">
+    <div class="navbar">
+        <a class="logo" href="./dashboard.html"><img src="../images/globe.svg" alt="">TimeShift</a>
+        <nav>
             <a href="./dashboard.html">Dashboard</a>
             <a href="./calendar.html">Calendar</a>
-            <a href="./shared-calendar.html">Shared Calendars</a>
-            <a href="./invitations.html">Invitations</a>
             <a class="active" href="./settings.html">Settings</a>
         </nav>
-    </header>
+    </div>
 
-    <!-- Main settings page -->
-    <main class="settings-container">
+    <div class="container">
 
-        <a class="back-link" href="./dashboard.html">
-            ← Back to Dashboard
-        </a>
+        <h1>Settings</h1>
+        <br>
 
-        <!-- Page title -->
-        <div class="settings-heading">
-            <p>Account</p>
-            <h1>Settings</h1>
-            <span>Manage your TimeShift preferences.</span>
-        </div>
-
-        <!-- Google account information -->
-        <section class="settings-card">
-            <div class="card-heading">
-                <div>
-                    <h2>Google Profile</h2>
-                    <p>Profile information provided by Google Sign-In.</p>
-                </div>
-            </div>
-
-            <div class="profile-information">
-                <img
-                    id="profile-photo"
-                    class="profile-photo"
-                    alt="User profile"
-                >
-
-                <div class="profile-fields">
-                    <label>
-                        Display name
+        <div class="box">
+            <h2>Profile</h2>
+            <p class="gray">This comes from your Google account.</p>
+            <div class="profile">
+                <img id="profile-photo" alt="Profile picture">
+                <div style="flex: 1;">
+                    <label class="settings-field">
+                        Name
                         <input id="profile-name" type="text" readonly>
                     </label>
-
-                    <label>
+                    <label class="settings-field">
                         Email
                         <input id="profile-email" type="email" readonly>
                     </label>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <!-- Form containing the user's settings -->
         <form id="settings-form">
 
-            <!-- Timezone settings -->
-            <section class="settings-card">
-                <div class="card-heading">
-                    <div>
-                        <h2>Timezone</h2>
-                        <p>Events will be displayed in this timezone.</p>
-                    </div>
-                </div>
-
+            <div class="box">
+                <h2>Time Zone</h2>
                 <label class="settings-field">
-                    Default timezone
-
+                    Your time zone
                     <select id="timezone-select" name="timeZone" required>
-                        <option value="">Select a timezone</option>
+                        <option value="">Select a time zone</option>
                     </select>
                 </label>
+                <p>Current time: <span id="current-time">...</span></p>
+            </div>
 
-                <div class="timezone-preview">
-                    <span>Current local time</span>
-                    <strong id="current-time">Loading...</strong>
-                </div>
-            </section>
-
-            <!-- Color theme settings -->
-            <section class="settings-card">
-                <div class="card-heading">
-                    <div>
-                        <h2>Appearance</h2>
-                        <p>Choose the color palette used throughout TimeShift.</p>
-                    </div>
-                </div>
-
+            <div class="box">
+                <h2>Appearance</h2>
                 <label class="settings-field">
-                    Theme palette
-
+                    Theme
                     <select id="theme-select" name="theme">
-                           <option value="system">
-                                System setting
-                          </option>
-
-                            <option value="light">
-                               Light mode
-                            </option>
-
-                             <option value="dark">
-                                Dark mode
-                             </option>
-                        </select>
+                        <option value="system">Same as my computer</option>
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
                     </select>
                 </label>
+            </div>
 
-                <div id="theme-preview" class="theme-preview">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
-            </section>
-
-            <!-- Default calendar settings -->
-            <section class="settings-card">
-                <div class="card-heading">
-                    <div>
-                        <h2>Calendar Preferences</h2>
-                        <p>Select where new events are saved by default.</p>
-                    </div>
-                </div>
-
+            <div class="box">
+                <h2>Default Calendar</h2>
                 <label class="settings-field">
-                    Default calendar
-
+                    New events go in
                     <select id="default-calendar" name="defaultCalendarId">
                         <option value="personal">My Calendar</option>
                     </select>
                 </label>
-            </section>
-
-            <!-- Saving message appears here -->
-            <p
-                id="save-status"
-                class="settings-status"
-                aria-live="polite"
-            ></p>
-
-            <!-- Save button -->
-            <div class="settings-actions">
-                <button class="save-settings-button" type="submit">
-                    Save Settings
-                </button>
             </div>
+
+            <p id="save-status"></p>
+            <button class="btn" type="submit">Save Settings</button>
         </form>
 
-        <!-- Sign-out section -->
-        <section class="settings-card account-actions">
-            <div>
-                <h2>Account Actions</h2>
-                <p>Sign out of TimeShift on this device.</p>
-            </div>
+        <br><br>
+        <div class="box">
+            <h2>Sign Out</h2>
+            <p class="gray">Sign out of TimeShift on this computer.</p>
+            <button id="sign-out-button" class="btn-red" type="button">Sign Out</button>
+        </div>
 
-            <button
-                id="sign-out-button"
-                class="settings-sign-out"
-                type="button"
-            >
-                Sign Out
-            </button>
-        </section>
+    </div>
 
-    </main>
-
-    <!-- Settings page behavior -->
     <script type="module" src="../js/pages/settings.js"></script>
-
 </body>
 </html>
