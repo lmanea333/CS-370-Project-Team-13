@@ -472,6 +472,97 @@ footer {
     text-align: right;
 }
 
+/* delete button goes on the left side */
+.form-buttons .left-button {
+    float: left;
+}
+
+/* ---------- event details popup ---------- */
+
+#details-dialog {
+    width: 95%;
+    max-width: 550px;
+    max-height: 90vh;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 0;
+    background-color: var(--box);
+    color: var(--text);
+}
+
+#close-details {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--text);
+}
+
+.details-inside {
+    padding: 15px;
+}
+
+/* the two time boxes side by side */
+.time-box {
+    display: inline-block;
+    vertical-align: top;
+    width: 48%;
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+}
+
+.time-box.original {
+    margin-left: 2%;
+    background-color: var(--light-green);
+}
+
+.time-box h3 {
+    margin: 0 0 6px 0;
+    font-size: 14px;
+    color: var(--dark-green);
+}
+
+.time-box p {
+    margin: 3px 0;
+}
+
+.big-date {
+    font-size: 14px;
+}
+
+.big-time {
+    font-size: 17px;
+    font-weight: bold;
+}
+
+.details-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+}
+
+.details-table th,
+.details-table td {
+    text-align: left;
+    vertical-align: top;
+    padding: 7px 5px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+}
+
+.details-table th {
+    width: 120px;
+    color: var(--gray);
+}
+
+/* keeps line breaks the user typed + long links wrap */
+#details-description,
+#details-link {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
 
 /* ---------- settings ---------- */
 
@@ -563,6 +654,12 @@ html[data-theme="dark"] {
 
     .event-date {
         display: none;
+    }
+   
+    .time-box,
+    .time-box.original {
+        width: 100%;
+        margin-left: 0;
     }
 
     .login-box {
