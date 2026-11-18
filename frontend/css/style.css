@@ -1,0 +1,571 @@
+/* TimeShift - CS 370 Team 13
+   one css file for all the pages */
+
+@import url("https://fonts.googleapis.com/css2?family=Lora:wght@600&display=swap");
+
+/* matcha colors */
+:root {
+    --green: #5f8a3a;
+    --dark-green: #4b7029;
+    --light-green: #e3eed3;
+    --pink: #f6cdd4;
+    --bg: #faf8f1;
+    --box: #ffffff;
+    --text: #333333;
+    --gray: #777777;
+    --border: #cccccc;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/* the fancy font is only for the logo and titles */
+h1, .logo, #month-year {
+    font-family: "Lora", Georgia, serif;
+}
+
+h1 {
+    margin-top: 0;
+}
+
+h2 {
+    font-size: 20px;
+    margin-top: 0;
+}
+
+.gray {
+    color: var(--gray);
+}
+
+.hidden {
+    display: none !important;
+}
+
+
+/* ---------- navbar ---------- */
+
+.navbar {
+    background-color: var(--light-green);
+    border-bottom: 2px solid var(--green);
+    padding: 12px 25px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.navbar .logo {
+    color: var(--dark-green);
+    font-size: 26px;
+    text-decoration: none;
+    margin-right: 35px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* globe logo */
+.navbar .logo img {
+    width: 32px;
+    height: 32px;
+}
+
+.navbar nav a {
+    color: var(--dark-green);
+    text-decoration: none;
+    margin-right: 20px;
+}
+
+.navbar nav a:hover {
+    text-decoration: underline;
+}
+
+.navbar nav a.active {
+    font-weight: bold;
+}
+
+.navbar .sign-out {
+    margin-left: auto;
+}
+
+#invitation-count {
+    background-color: red;
+    color: white;
+    font-size: 11px;
+    padding: 1px 5px;
+    border-radius: 8px;
+    margin-left: 3px;
+}
+
+
+/* ---------- page layout ---------- */
+
+.container {
+    max-width: 1000px;
+    margin: 25px auto;
+    padding: 0 15px;
+}
+
+.box {
+    background-color: var(--box);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+footer {
+    text-align: center;
+    color: var(--gray);
+    font-size: 13px;
+    padding: 20px;
+}
+
+
+/* ---------- buttons ---------- */
+
+.btn {
+    background-color: var(--green);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 15px;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: var(--dark-green);
+}
+
+.btn-gray, .navbar .sign-out {
+    background-color: white;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 7px 14px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.btn-red {
+    background-color: white;
+    color: #c0392b;
+    border: 1px solid #c0392b;
+    border-radius: 5px;
+    padding: 8px 15px;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+
+/* ---------- login page ---------- */
+
+.login-box {
+    width: 380px;
+    margin: 100px auto 20px auto;
+    background-color: var(--box);
+    border: 1px solid var(--border);
+    border-top: 6px solid var(--green);
+    border-radius: 5px;
+    padding: 30px;
+    text-align: center;
+}
+
+.login-logo {
+    width: 90px;
+    height: 90px;
+}
+
+.login-box h1 {
+    color: var(--green);
+    font-size: 38px;
+    margin-bottom: 10px;
+}
+
+.login-box .btn {
+    width: 100%;
+    margin-top: 10px;
+    padding: 11px;
+}
+
+#status {
+    color: var(--gray);
+    font-size: 14px;
+}
+
+
+/* ---------- dashboard ---------- */
+
+.top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.top-row p {
+    margin: 0;
+}
+
+.filter-row {
+    margin-bottom: 15px;
+}
+
+#event-count {
+    float: right;
+    color: var(--gray);
+    margin: 0;
+}
+
+.date-heading {
+    font-size: 16px;
+    margin: 20px 0 8px 0;
+}
+
+/* event in the list (made in dashboard.js) */
+.event-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    text-align: left;
+    background-color: var(--box);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 8px;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.event-card:hover {
+    background-color: #f6f9f1;
+}
+
+.event-color {
+    width: 6px;
+    align-self: stretch;
+    background-color: var(--green);
+}
+
+.event-date {
+    width: 95px;
+    color: var(--gray);
+    font-size: 13px;
+}
+
+.event-time {
+    width: 75px;
+    font-weight: bold;
+}
+
+.event-title {
+    font-weight: bold;
+    margin: 0 0 3px 0;
+}
+
+.event-meta {
+    color: var(--gray);
+    font-size: 13px;
+    margin: 0;
+}
+
+.event-arrow {
+    margin-left: auto;
+    color: var(--gray);
+}
+
+#empty-events {
+    text-align: center;
+    color: var(--gray);
+}
+
+
+/* ---------- calendar ---------- */
+
+.calendar-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.month-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.month-buttons button {
+    background-color: white;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 4px 11px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+#month-year {
+    font-size: 26px;
+    width: 210px;
+    text-align: center;
+}
+
+.calendar {
+    background-color: var(--box);
+    border: 1px solid var(--border);
+}
+
+.calendar-weekdays,
+.calendar-dates {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.calendar-weekdays div {
+    background-color: var(--green);
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    padding: 7px;
+}
+
+.calendar-dates div {
+    min-height: 100px;
+    padding: 5px;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.calendar-dates div:nth-child(7n) {
+    border-right: none;
+}
+
+.calendar-dates div:hover {
+    background-color: #f6f9f1;
+}
+
+.date-number {
+    display: block;
+    margin-bottom: 4px;
+}
+
+/* today is pink (strawberry matcha)*/
+.calendar-dates .current-date {
+    background-color: var(--pink);
+    font-weight: bold;
+}
+
+/* blank days before the 1st */
+.calendar-dates div.empty-date {
+    background-color: #f0eee6;
+    cursor: default;
+}
+
+/* events in a day (made in calendar.js) */
+.calendar-event {
+    display: block;
+    width: 100%;
+    margin-bottom: 3px;
+    padding: 2px 4px;
+    border: none;
+    border-radius: 3px;
+    color: white;
+    font-size: 12px;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+}
+
+
+/* ---------- new event popup ---------- */
+
+#event-dialog {
+    width: 95%;
+    max-width: 600px;
+    max-height: 90vh;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 0;
+    background-color: var(--box);
+    color: var(--text);
+}
+
+.dialog-title {
+    background-color: var(--light-green);
+    border-bottom: 2px solid var(--green);
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dialog-title h2 {
+    margin: 0;
+    color: var(--dark-green);
+}
+
+#close-event-form {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.form-inside {
+    padding: 15px;
+}
+
+.form-field {
+    margin-bottom: 12px;
+}
+
+.form-field label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+    width: 100%;
+    padding: 6px;
+    border: 1px solid #aaaaaa;
+    border-radius: 3px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+}
+
+#event-color {
+    height: 34px;
+    padding: 2px;
+}
+
+.form-row {
+    display: flex;
+    gap: 12px;
+}
+
+.form-row .form-field {
+    flex: 1;
+}
+
+#event-form-status {
+    color: red;
+}
+
+.form-buttons {
+    text-align: right;
+}
+
+
+/* ---------- settings ---------- */
+
+.settings-field {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.settings-field select,
+.settings-field input {
+    display: block;
+    width: 100%;
+    max-width: 400px;
+    margin-top: 5px;
+    padding: 6px;
+    font-weight: normal;
+    border: 1px solid #aaaaaa;
+    border-radius: 3px;
+}
+
+.settings-field input[readonly] {
+    background-color: #eeeeee;
+}
+
+.profile {
+    display: flex;
+    gap: 20px;
+}
+
+#profile-photo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+}
+
+#save-status {
+    color: green;
+}
+
+
+/* ---------- dark mode (from settings) ---------- */
+
+html[data-theme="dark"] {
+    --green: #7fae55;
+    --dark-green: #a6cc80;
+    --light-green: #2b3524;
+    --pink: #5b3940;
+    --bg: #1d1d1b;
+    --box: #2a2a27;
+    --text: #e6e6e6;
+    --gray: #aaaaaa;
+    --border: #48483f;
+}
+
+@media (prefers-color-scheme: dark) {
+    html:not([data-theme="light"]) {
+        --green: #7fae55;
+        --dark-green: #a6cc80;
+        --light-green: #2b3524;
+        --pink: #5b3940;
+        --bg: #1d1d1b;
+        --box: #2a2a27;
+        --text: #e6e6e6;
+        --gray: #aaaaaa;
+        --border: #48483f;
+    }
+}
+
+
+/* ---------- phones ---------- */
+
+@media (max-width: 650px) {
+    .top-row, .calendar-top {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .calendar-dates div {
+        min-height: 60px;
+        font-size: 12px;
+    }
+
+    .event-date {
+        display: none;
+    }
+
+    .login-box {
+        width: 90%;
+    }
+}

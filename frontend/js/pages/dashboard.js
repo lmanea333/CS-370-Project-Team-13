@@ -217,7 +217,7 @@ date.textContent = new Intl.DateTimeFormat("en-US", {
 
     if (event.location) {
         informationText =
-            informationText + " · " + event.location;
+            informationText + " - " + event.location;
     }
 
     eventInformation.textContent = informationText;
