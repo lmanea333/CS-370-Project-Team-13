@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dashboard - TimeShift</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <script type="module" src="../js/theme.js"></script>
+</head>
+<body>
+
+    <div class="navbar">
+        <a class="logo" href="./dashboard.html">TimeShift</a>
+        <nav>
+            <a class="active" href="./dashboard.html">Dashboard</a>
+            <a href="./calendar.html">Calendar</a>
+            <a href="./shared-calendar.html">Shared Calendars</a>
+            <a href="./invitations.html">Invitations<span id="invitation-count" hidden>0</span></a>
+            <a href="./settings.html">Settings</a>
+        </nav>
+        <button id="sign-out-button" class="sign-out" type="button">Sign Out</button>
+    </div>
+
+    <div class="container">
+
+        <div class="top-row">
+            <div>
+                <h1 id="user-greeting">Your schedule</h1>
+                <p class="gray">Times are shown in <b id="current-timezone">...</b></p>
+            </div>
+            <button id="dashboard-new-event" class="btn" type="button">+ New Event</button>
+        </div>
+
+        <div class="box">
+            <h2>Upcoming Events</h2>
+
+            <div class="filter-row">
+                <label for="event-filter">Show:</label>
+                <select id="event-filter">
+                    <option value="upcoming">Upcoming events</option>
+                    <option value="today">Today</option>
+                    <option value="week">This week</option>
+                    <option value="all">All events</option>
+                </select>
+                <p id="event-count">0 events</p>
+            </div>
+
+            <!-- dashboard.js puts the events in here -->
+            <div id="events-list"></div>
+
+            <div id="empty-events" hidden>
+                <p>You don't have any events yet. Click "+ New Event" to add one.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="module" src="../js/pages/dashboard.js"></script>
+</body>
+</html>

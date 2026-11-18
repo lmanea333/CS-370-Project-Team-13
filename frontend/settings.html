@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Settings - TimeShift</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <script type="module" src="../js/theme.js"></script>
+</head>
+<body>
+
+    <div class="navbar">
+        <a class="logo" href="./dashboard.html">TimeShift</a>
+        <nav>
+            <a href="./dashboard.html">Dashboard</a>
+            <a href="./calendar.html">Calendar</a>
+            <a href="./shared-calendar.html">Shared Calendars</a>
+            <a href="./invitations.html">Invitations</a>
+            <a class="active" href="./settings.html">Settings</a>
+        </nav>
+    </div>
+
+    <div class="container">
+
+        <h1>Settings</h1>
+        <br>
+
+        <div class="box">
+            <h2>Profile</h2>
+            <p class="gray">This comes from your Google account.</p>
+            <div class="profile">
+                <img id="profile-photo" alt="Profile picture">
+                <div style="flex: 1;">
+                    <label class="settings-field">
+                        Name
+                        <input id="profile-name" type="text" readonly>
+                    </label>
+                    <label class="settings-field">
+                        Email
+                        <input id="profile-email" type="email" readonly>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <form id="settings-form">
+
+            <div class="box">
+                <h2>Time Zone</h2>
+                <label class="settings-field">
+                    Your time zone
+                    <select id="timezone-select" name="timeZone" required>
+                        <option value="">Select a time zone</option>
+                    </select>
+                </label>
+                <p>Current time: <span id="current-time">...</span></p>
+            </div>
+
+            <div class="box">
+                <h2>Appearance</h2>
+                <label class="settings-field">
+                    Theme
+                    <select id="theme-select" name="theme">
+                        <option value="system">Same as my computer</option>
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
+                    </select>
+                </label>
+            </div>
+
+            <div class="box">
+                <h2>Default Calendar</h2>
+                <label class="settings-field">
+                    New events go in
+                    <select id="default-calendar" name="defaultCalendarId">
+                        <option value="personal">My Calendar</option>
+                    </select>
+                </label>
+            </div>
+
+            <p id="save-status"></p>
+            <button class="btn" type="submit">Save Settings</button>
+        </form>
+
+        <br><br>
+        <div class="box">
+            <h2>Sign Out</h2>
+            <p class="gray">Sign out of TimeShift on this computer.</p>
+            <button id="sign-out-button" class="btn-red" type="button">Sign Out</button>
+        </div>
+
+    </div>
+
+    <script type="module" src="../js/pages/settings.js"></script>
+</body>
+</html>
