@@ -224,9 +224,16 @@ async function showRepeat(event) {
     try {
         const repetitions = await getEventRepetitions(event.id);
         const frequency = repetitions[0] ? repetitions[0].frequency : null;
+        const timesCount = repetitions[0] ? repetitions[0].occurrenceCount : null;
 
-        $("details-repeat").textContent =
-            repeatLabels[frequency] || "Repeats";
+        let text = repeatLabels[frequency] || "Repeats";
+
+        // ex: "Every week, 10 times"
+        if (timesCount) {
+            text = text + ", " + timesCount + " times";
+        }
+
+        $("details-repeat").textContent = text;
     } catch (error) {
         console.error("couldn't load repeat info", error);
         $("details-repeat").textContent = "Repeats";
