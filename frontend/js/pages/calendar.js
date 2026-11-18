@@ -2,6 +2,7 @@ import { onAuthStateChanged } from "firebase/auth";
 
 import { auth } from "../../firebase/config.js";
 import { getUserEvents } from "../../firebase/events.js";
+import { openEventDetails } from "../event-details.js";
 
 
 // ---------- Calendar elements ----------
@@ -119,9 +120,8 @@ function createEventLabel(event) {
     eventLabel.addEventListener("click", (clickEvent) => {
         clickEvent.stopPropagation();
 
-        // This will later become the Edit Event popup
-        window.alert(
-            `${event.title}\n${formatEventTime(event)}`
+        // show the event details popup
+        openEventDetails(event);
         );
     });
 
@@ -198,6 +198,7 @@ async function loadEvents(userId) {
         });
 
         renderCalendar(currentMonth, currentYear);
+        openEditFromLink();
     } catch (error) {
         console.error("Unable to load events:", error);
     }
@@ -248,13 +249,46 @@ calendarDates.addEventListener("click", (event) => {
 });
 
 
-// ---------- Refresh after saving ----------
+// ---------- Refresh after saving or deleting ----------
 
-window.addEventListener("timeshift:event-saved", () => {
+function reloadEvents() {
     if (auth.currentUser) {
         loadEvents(auth.currentUser.uid);
     }
-});
+}
+
+window.addEventListener("timeshift:event-saved", reloadEvents);
+window.addEventListener("timeshift:event-deleted", reloadEvents);
+
+
+// ---------- Edit link from the dashboard ----------
+
+// the dashboard sends people to calendar.html?edit=EVENT_ID
+function openEditFromLink() {
+    const params = new URLSearchParams(window.location.search);
+    const eventId = params.get("edit");
+
+    if (!eventId) {
+        return;
+    }
+
+    // take ?edit= off the address so refreshing doesn't reopen it
+    window.history.replaceState(null, "", window.location.pathname);
+
+    const event = savedEvents.find((item) => item.id === eventId);
+
+    if (event) {
+        // go to that event's month
+        const date = getEventDateParts(event);
+        currentMonth = date.month;
+        currentYear = date.year;
+        renderCalendar(currentMonth, currentYear);
+
+        window.dispatchEvent(
+            new CustomEvent("timeshift:edit-event", { detail: event })
+        );
+    }
+}
 
 
 // ---------- Start calendar ----------
