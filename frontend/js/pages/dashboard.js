@@ -52,24 +52,7 @@ timeZoneDisplay.textContent = userTimeZone;
 // --------------------------------------------------
 
 let events = [];
-// Load the signed-in user's events from Firebase
-async function loadUserEvents(userId) {
-    try {
-        const savedEvents = await getUserEvents(userId);
 
-        events = savedEvents.map((event) => ({
-            ...event,
-            startAt: event.startAt?.toDate
-                ? event.startAt.toDate()
-                : new Date(event.startAt)
-        }));
-
-        displayEvents();
-
-    } catch (error) {
-        console.error("Unable to load dashboard events:", error);
-    }
-}
 
 
 // --------------------------------------------------
@@ -399,13 +382,7 @@ async function signOutUser() {
 // 12. Start the dashboard
 // --------------------------------------------------
 
-watchAuthState((user) => {
-    displayUser(user);
-
-    if (user) {
-        loadUserEvents(user.uid);
-    }
-});
+watchAuthState(displayUser);
 
 eventFilter.addEventListener("change", displayEvents);
 newEventButton.addEventListener("click", openNewEventForm);
