@@ -1,5 +1,7 @@
 // Import the Google authentication functions
 import { logOut, watchAuthState } from "../../firebase/auth.js";
+import { auth } from "../../firebase/config.js";
+import { getUserEvents } from "../../firebase/events.js";
 
 
 // --------------------------------------------------
@@ -50,6 +52,24 @@ timeZoneDisplay.textContent = userTimeZone;
 // --------------------------------------------------
 
 let events = [];
+// Load the signed-in user's events from Firebase
+async function loadUserEvents(userId) {
+    try {
+        const savedEvents = await getUserEvents(userId);
+
+        events = savedEvents.map((event) => ({
+            ...event,
+            startAt: event.startAt?.toDate
+                ? event.startAt.toDate()
+                : new Date(event.startAt)
+        }));
+
+        displayEvents();
+
+    } catch (error) {
+        console.error("Unable to load dashboard events:", error);
+    }
+}
 
 
 // --------------------------------------------------
@@ -134,8 +154,8 @@ function getFilteredEvents() {
                 event.startAt >= now &&
                 event.startAt <= endOfWeek;
         } else if (selectedFilter === "all") {
-            includeEvent = true;
-        } else {
+            includeEvent = event.startAt >= now;
+        }else {
             // The default filter shows upcoming events
             includeEvent = event.startAt >= now;
         }
@@ -173,6 +193,16 @@ function createEventCard(event) {
     time.className = "event-time";
     time.textContent = formatTime(event.startAt);
 
+    // Event date
+const date = document.createElement("span");
+date.className = "event-date";
+date.textContent = new Intl.DateTimeFormat("en-US", {
+    timeZone: userTimeZone,
+    month: "short",
+    day: "numeric",
+    year: "numeric"
+}).format(event.startAt);
+
     // Container for the title and details
     const details = document.createElement("span");
 
@@ -201,6 +231,7 @@ function createEventCard(event) {
     arrow.textContent = "›";
 
     eventCard.appendChild(colorBar);
+    eventCard.appendChild(date);
     eventCard.appendChild(time);
     eventCard.appendChild(details);
     eventCard.appendChild(arrow);
@@ -322,10 +353,14 @@ async function signOutUser() {
 // 12. Start the dashboard
 // --------------------------------------------------
 
-watchAuthState(displayUser);
+watchAuthState((user) => {
+    displayUser(user);
+
+    if (user) {
+        loadUserEvents(user.uid);
+    }
+});
 
 eventFilter.addEventListener("change", displayEvents);
 newEventButton.addEventListener("click", openNewEventForm);
 signOutButton.addEventListener("click", signOutUser);
-
-displayEvents();
