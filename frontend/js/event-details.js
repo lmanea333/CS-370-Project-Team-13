@@ -356,7 +356,9 @@ export async function deleteEventWithConfirm(event) {
 }
 
 $("details-delete").addEventListener("click", async () => {
-    const deleted = await deleteEventWithConfirm(currentEvent);
+    // for a repeat, delete the real event (the whole series)
+    const event = currentEvent.seriesEvent || currentEvent;
+    const deleted = await deleteEventWithConfirm(event);
 
     if (deleted) {
         closeEventDetails();
@@ -369,13 +371,18 @@ $("details-delete").addEventListener("click", async () => {
 $("details-edit").addEventListener("click", () => {
     closeEventDetails();
 
+    // for a repeat, edit the real event (the first date), not the copy
+    const event = currentEvent.seriesEvent || currentEvent;
+
     // the calendar page has the event form, so open it there
     if (document.getElementById("event-form")) {
         window.dispatchEvent(
-            new CustomEvent("timeshift:edit-event", { detail: currentEvent })
+            new CustomEvent("timeshift:edit-event", { detail: event })
         );
     } else {
         // dashboard doesn't have the form, so go to the calendar page
-        window.location.href = "./calendar.html?edit=" + currentEvent.id;
+        window.location.href = "./calendar.html?edit=" + event.id;
     }
 });
+
+
