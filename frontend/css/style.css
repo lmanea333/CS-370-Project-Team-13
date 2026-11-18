@@ -1,18 +1,19 @@
-/* TimeShift - main stylesheet
-   CS 370 Team 13
-   All the pages use this one file */
+/* TimeShift - CS 370 Team 13
+   one css file for all the pages */
 
-/* colors (dark mode is at the bottom) */
+@import url("https://fonts.googleapis.com/css2?family=Lora:wght@600&display=swap");
+
+/* matcha colors */
 :root {
-    --blue: #1f3b6e;
-    --button: #2a5db0;
-    --button-hover: #1e4a92;
-    --bg: #ececec;
+    --green: #5f8a3a;
+    --dark-green: #4b7029;
+    --light-green: #e3eed3;
+    --pink: #f6cdd4;
+    --bg: #faf8f1;
     --box: #ffffff;
-    --text: #222222;
-    --gray-text: #666666;
-    --line: #c4c4c4;
-    --today: #fff3b0;
+    --text: #333333;
+    --gray: #777777;
+    --border: #cccccc;
 }
 
 * {
@@ -24,92 +25,87 @@ body {
     background-color: var(--bg);
     color: var(--text);
     font-family: Arial, Helvetica, sans-serif;
-    font-size: 15px;
+}
+
+/* the fancy font is only for the logo and titles */
+h1, .logo, #month-year {
+    font-family: "Lora", Georgia, serif;
 }
 
 h1 {
-    font-size: 26px;
-    margin: 0 0 6px 0;
+    margin-top: 0;
 }
 
 h2 {
-    font-size: 19px;
-    margin: 0 0 10px 0;
+    font-size: 20px;
+    margin-top: 0;
 }
 
-a {
-    color: var(--button);
+.gray {
+    color: var(--gray);
 }
 
-button, input, select, textarea {
-    font-family: inherit;
-    font-size: 15px;
+.hidden {
+    display: none !important;
 }
 
 
-/* ===== navbar ===== */
+/* ---------- navbar ---------- */
 
 .navbar {
-    background-color: var(--blue);
-    color: white;
+    background-color: var(--light-green);
+    border-bottom: 2px solid var(--green);
     padding: 12px 25px;
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 20px;
 }
 
 .navbar .logo {
-    color: white;
-    font-size: 22px;
-    font-weight: bold;
+    color: var(--dark-green);
+    font-size: 26px;
     text-decoration: none;
-    margin-right: 15px;
+    margin-right: 35px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* globe logo */
+.navbar .logo img {
+    width: 32px;
+    height: 32px;
 }
 
 .navbar nav a {
-    color: #dce4f2;
+    color: var(--dark-green);
     text-decoration: none;
-    margin-right: 16px;
+    margin-right: 20px;
 }
 
 .navbar nav a:hover {
-    color: white;
     text-decoration: underline;
 }
 
-/* the page you're on */
 .navbar nav a.active {
-    color: white;
     font-weight: bold;
-    text-decoration: underline;
 }
 
 .navbar .sign-out {
     margin-left: auto;
-    background-color: transparent;
-    color: white;
-    border: 1px solid white;
-    border-radius: 4px;
-    padding: 6px 12px;
-    cursor: pointer;
-}
-
-.navbar .sign-out:hover {
-    background-color: rgba(255, 255, 255, 0.15);
 }
 
 #invitation-count {
-    background-color: #d9534f;
+    background-color: red;
     color: white;
-    font-size: 12px;
-    padding: 1px 6px;
-    border-radius: 10px;
+    font-size: 11px;
+    padding: 1px 5px;
+    border-radius: 8px;
     margin-left: 3px;
 }
 
 
-/* ===== general page stuff ===== */
+/* ---------- page layout ---------- */
 
 .container {
     max-width: 1000px;
@@ -119,98 +115,94 @@ button, input, select, textarea {
 
 .box {
     background-color: var(--box);
-    border: 1px solid var(--line);
-    border-radius: 4px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
     padding: 20px;
     margin-bottom: 20px;
 }
 
-.gray {
-    color: var(--gray-text);
+footer {
+    text-align: center;
+    color: var(--gray);
+    font-size: 13px;
+    padding: 20px;
 }
 
+
+/* ---------- buttons ---------- */
+
 .btn {
-    background-color: var(--button);
+    background-color: var(--green);
     color: white;
     border: none;
-    border-radius: 4px;
-    padding: 9px 16px;
+    border-radius: 5px;
+    padding: 8px 15px;
+    font-size: 15px;
     cursor: pointer;
 }
 
 .btn:hover {
-    background-color: var(--button-hover);
+    background-color: var(--dark-green);
 }
 
-.btn-gray {
-    background-color: #dddddd;
-    color: #222;
-    border: 1px solid #bbbbbb;
-    border-radius: 4px;
-    padding: 9px 16px;
+.btn-gray, .navbar .sign-out {
+    background-color: white;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 7px 14px;
+    font-size: 14px;
     cursor: pointer;
-}
-
-.btn-gray:hover {
-    background-color: #cccccc;
 }
 
 .btn-red {
     background-color: white;
     color: #c0392b;
     border: 1px solid #c0392b;
-    border-radius: 4px;
-    padding: 9px 16px;
+    border-radius: 5px;
+    padding: 8px 15px;
+    font-size: 15px;
     cursor: pointer;
 }
 
-.btn-red:hover {
-    background-color: #fbeaea;
-}
 
-.hidden {
-    display: none !important;
-}
-
-footer {
-    text-align: center;
-    color: var(--gray-text);
-    font-size: 13px;
-    padding: 20px;
-}
-
-
-/* ===== login page ===== */
+/* ---------- login page ---------- */
 
 .login-box {
-    max-width: 400px;
-    margin: 90px auto 20px auto;
-    text-align: center;
+    width: 380px;
+    margin: 100px auto 20px auto;
     background-color: var(--box);
-    border: 1px solid var(--line);
-    border-radius: 4px;
+    border: 1px solid var(--border);
+    border-top: 6px solid var(--green);
+    border-radius: 5px;
     padding: 30px;
+    text-align: center;
+}
+
+.login-logo {
+    width: 90px;
+    height: 90px;
 }
 
 .login-box h1 {
-    color: var(--blue);
-    font-size: 32px;
+    color: var(--green);
+    font-size: 38px;
+    margin-bottom: 10px;
 }
 
 .login-box .btn {
-    margin-top: 15px;
     width: 100%;
+    margin-top: 10px;
     padding: 11px;
 }
 
 #status {
-    color: var(--gray-text);
+    color: var(--gray);
     font-size: 14px;
-    margin-top: 15px;
 }
 
 
-/* ===== dashboard ===== */
+/* ---------- dashboard ---------- */
 
 .top-row {
     display: flex;
@@ -227,26 +219,18 @@ footer {
     margin-bottom: 15px;
 }
 
-.filter-row select {
-    padding: 5px;
-    margin-left: 5px;
-}
-
 #event-count {
     float: right;
-    color: var(--gray-text);
+    color: var(--gray);
     margin: 0;
 }
 
-/* "Today", "Tomorrow", etc */
 .date-heading {
-    font-size: 15px;
+    font-size: 16px;
     margin: 20px 0 8px 0;
-    padding-bottom: 4px;
-    border-bottom: 1px solid var(--line);
 }
 
-/* one event in the list (made in dashboard.js) */
+/* event in the list (made in dashboard.js) */
 .event-card {
     display: flex;
     align-items: center;
@@ -255,26 +239,27 @@ footer {
     text-align: left;
     background-color: var(--box);
     color: var(--text);
-    border: 1px solid var(--line);
-    border-radius: 4px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
     padding: 10px;
     margin-bottom: 8px;
+    font-size: 15px;
     cursor: pointer;
 }
 
 .event-card:hover {
-    background-color: #f5f8fd;
+    background-color: #f6f9f1;
 }
 
 .event-color {
     width: 6px;
     align-self: stretch;
-    background-color: var(--button);
+    background-color: var(--green);
 }
 
 .event-date {
     width: 95px;
-    color: var(--gray-text);
+    color: var(--gray);
     font-size: 13px;
 }
 
@@ -289,24 +274,23 @@ footer {
 }
 
 .event-meta {
-    color: var(--gray-text);
+    color: var(--gray);
     font-size: 13px;
     margin: 0;
 }
 
 .event-arrow {
     margin-left: auto;
-    color: var(--gray-text);
+    color: var(--gray);
 }
 
 #empty-events {
     text-align: center;
-    color: var(--gray-text);
-    padding: 30px;
+    color: var(--gray);
 }
 
 
-/* ===== calendar page ===== */
+/* ---------- calendar ---------- */
 
 .calendar-top {
     display: flex;
@@ -322,29 +306,23 @@ footer {
 }
 
 .month-buttons button {
-    background-color: var(--box);
-    color: var(--text);
-    border: 1px solid var(--line);
-    border-radius: 4px;
-    padding: 4px 12px;
-    font-size: 18px;
+    background-color: white;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 4px 11px;
+    font-size: 16px;
     cursor: pointer;
 }
 
-.month-buttons button:hover {
-    background-color: #dddddd;
-}
-
 #month-year {
-    font-size: 22px;
-    font-weight: bold;
-    min-width: 190px;
+    font-size: 26px;
+    width: 210px;
     text-align: center;
 }
 
 .calendar {
     background-color: var(--box);
-    border: 1px solid var(--line);
+    border: 1px solid var(--border);
 }
 
 .calendar-weekdays,
@@ -354,19 +332,18 @@ footer {
 }
 
 .calendar-weekdays div {
-    background-color: var(--blue);
+    background-color: var(--green);
     color: white;
     font-weight: bold;
     text-align: center;
-    padding: 8px;
+    padding: 7px;
 }
 
-/* each day square */
 .calendar-dates div {
-    min-height: 105px;
+    min-height: 100px;
     padding: 5px;
-    border-right: 1px solid var(--line);
-    border-bottom: 1px solid var(--line);
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
     overflow: hidden;
     cursor: pointer;
 }
@@ -376,35 +353,27 @@ footer {
 }
 
 .calendar-dates div:hover {
-    background-color: #eef3fb;
+    background-color: #f6f9f1;
 }
 
 .date-number {
     display: block;
-    font-size: 14px;
     margin-bottom: 4px;
 }
 
-/* highlight today in yellow */
+/* today is pink (strawberry matcha)*/
 .calendar-dates .current-date {
-    background-color: var(--today);
-}
-
-.current-date .date-number {
+    background-color: var(--pink);
     font-weight: bold;
 }
 
-/* the days before the 1st */
-.calendar-dates .empty-date {
-    background-color: #f4f4f4;
+/* blank days before the 1st */
+.calendar-dates div.empty-date {
+    background-color: #f0eee6;
     cursor: default;
 }
 
-.calendar-dates .empty-date:hover {
-    background-color: #f4f4f4;
-}
-
-/* events inside a day (made in calendar.js) */
+/* events in a day (made in calendar.js) */
 .calendar-event {
     display: block;
     width: 100%;
@@ -422,26 +391,22 @@ footer {
 }
 
 
-/* ===== new event popup ===== */
+/* ---------- new event popup ---------- */
 
 #event-dialog {
     width: 95%;
     max-width: 600px;
     max-height: 90vh;
-    border: 1px solid #888;
-    border-radius: 4px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
     padding: 0;
     background-color: var(--box);
     color: var(--text);
 }
 
-#event-dialog::backdrop {
-    background-color: rgba(0, 0, 0, 0.5);
-}
-
 .dialog-title {
-    background-color: var(--blue);
-    color: white;
+    background-color: var(--light-green);
+    border-bottom: 2px solid var(--green);
     padding: 10px 15px;
     display: flex;
     justify-content: space-between;
@@ -450,22 +415,20 @@ footer {
 
 .dialog-title h2 {
     margin: 0;
-    font-size: 18px;
+    color: var(--dark-green);
 }
 
 #close-event-form {
     background: none;
     border: none;
-    color: white;
     font-size: 24px;
     cursor: pointer;
 }
 
-#event-form .form-inside {
+.form-inside {
     padding: 15px;
 }
 
-/* label + input */
 .form-field {
     margin-bottom: 12px;
 }
@@ -480,19 +443,18 @@ footer {
 .form-field select,
 .form-field textarea {
     width: 100%;
-    padding: 7px;
+    padding: 6px;
     border: 1px solid #aaaaaa;
     border-radius: 3px;
-    background-color: white;
-    color: #222;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
 }
 
 #event-color {
-    height: 36px;
+    height: 34px;
     padding: 2px;
 }
 
-/* two fields side by side */
 .form-row {
     display: flex;
     gap: 12px;
@@ -503,19 +465,15 @@ footer {
 }
 
 #event-form-status {
-    color: #c0392b;
-    min-height: 18px;
-    margin: 5px 0;
+    color: red;
 }
 
 .form-buttons {
     text-align: right;
-    border-top: 1px solid var(--line);
-    padding-top: 12px;
 }
 
 
-/* ===== settings ===== */
+/* ---------- settings ---------- */
 
 .settings-field {
     display: block;
@@ -529,31 +487,25 @@ footer {
     width: 100%;
     max-width: 400px;
     margin-top: 5px;
-    padding: 7px;
+    padding: 6px;
     font-weight: normal;
     border: 1px solid #aaaaaa;
     border-radius: 3px;
 }
 
 .settings-field input[readonly] {
-    background-color: #f2f2f2;
-    color: #555;
+    background-color: #eeeeee;
 }
 
 .profile {
     display: flex;
     gap: 20px;
-    align-items: flex-start;
 }
 
 #profile-photo {
     width: 80px;
     height: 80px;
-    border: 1px solid var(--line);
-}
-
-#current-time {
-    font-weight: bold;
+    border-radius: 50%;
 }
 
 #save-status {
@@ -561,59 +513,39 @@ footer {
 }
 
 
-/* ===== dark mode =====
-   theme.js sets data-theme="dark" when you pick it in Settings.
-   "System setting" uses the media query instead */
+/* ---------- dark mode (from settings) ---------- */
 
 html[data-theme="dark"] {
-    --blue: #16294d;
-    --button: #3f74c9;
-    --button-hover: #5585d4;
-    --bg: #1c1c1c;
-    --box: #2a2a2a;
-    --text: #eeeeee;
-    --gray-text: #aaaaaa;
-    --line: #444444;
-    --today: #4a4320;
-    color-scheme: dark;
+    --green: #7fae55;
+    --dark-green: #a6cc80;
+    --light-green: #2b3524;
+    --pink: #5b3940;
+    --bg: #1d1d1b;
+    --box: #2a2a27;
+    --text: #e6e6e6;
+    --gray: #aaaaaa;
+    --border: #48483f;
 }
 
 @media (prefers-color-scheme: dark) {
     html:not([data-theme="light"]) {
-        --blue: #16294d;
-        --button: #3f74c9;
-        --button-hover: #5585d4;
-        --bg: #1c1c1c;
-        --box: #2a2a2a;
-        --text: #eeeeee;
-        --gray-text: #aaaaaa;
-        --line: #444444;
-        --today: #4a4320;
-        color-scheme: dark;
+        --green: #7fae55;
+        --dark-green: #a6cc80;
+        --light-green: #2b3524;
+        --pink: #5b3940;
+        --bg: #1d1d1b;
+        --box: #2a2a27;
+        --text: #e6e6e6;
+        --gray: #aaaaaa;
+        --border: #48483f;
     }
 }
 
-/* fix hover colors that are hard coded above */
-html[data-theme="dark"] .calendar-dates div:hover,
-html[data-theme="dark"] .event-card:hover {
-    background-color: #33394a;
-}
 
-html[data-theme="dark"] .calendar-dates .empty-date,
-html[data-theme="dark"] .calendar-dates .empty-date:hover {
-    background-color: #222222;
-}
-
-
-/* ===== phones ===== */
+/* ---------- phones ---------- */
 
 @media (max-width: 650px) {
-    .navbar {
-        padding: 10px 15px;
-    }
-
-    .top-row,
-    .calendar-top {
+    .top-row, .calendar-top {
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;
@@ -625,7 +557,7 @@ html[data-theme="dark"] .calendar-dates .empty-date:hover {
     }
 
     .calendar-dates div {
-        min-height: 65px;
+        min-height: 60px;
         font-size: 12px;
     }
 
@@ -633,7 +565,7 @@ html[data-theme="dark"] .calendar-dates .empty-date:hover {
         display: none;
     }
 
-    .profile {
-        flex-direction: column;
+    .login-box {
+        width: 90%;
     }
 }
