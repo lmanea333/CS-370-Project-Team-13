@@ -1,0 +1,639 @@
+/* TimeShift - main stylesheet
+   CS 370 Team 13
+   All the pages use this one file */
+
+/* colors (dark mode is at the bottom) */
+:root {
+    --blue: #1f3b6e;
+    --button: #2a5db0;
+    --button-hover: #1e4a92;
+    --bg: #ececec;
+    --box: #ffffff;
+    --text: #222222;
+    --gray-text: #666666;
+    --line: #c4c4c4;
+    --today: #fff3b0;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 15px;
+}
+
+h1 {
+    font-size: 26px;
+    margin: 0 0 6px 0;
+}
+
+h2 {
+    font-size: 19px;
+    margin: 0 0 10px 0;
+}
+
+a {
+    color: var(--button);
+}
+
+button, input, select, textarea {
+    font-family: inherit;
+    font-size: 15px;
+}
+
+
+/* ===== navbar ===== */
+
+.navbar {
+    background-color: var(--blue);
+    color: white;
+    padding: 12px 25px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.navbar .logo {
+    color: white;
+    font-size: 22px;
+    font-weight: bold;
+    text-decoration: none;
+    margin-right: 15px;
+}
+
+.navbar nav a {
+    color: #dce4f2;
+    text-decoration: none;
+    margin-right: 16px;
+}
+
+.navbar nav a:hover {
+    color: white;
+    text-decoration: underline;
+}
+
+/* the page you're on */
+.navbar nav a.active {
+    color: white;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.navbar .sign-out {
+    margin-left: auto;
+    background-color: transparent;
+    color: white;
+    border: 1px solid white;
+    border-radius: 4px;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+.navbar .sign-out:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+#invitation-count {
+    background-color: #d9534f;
+    color: white;
+    font-size: 12px;
+    padding: 1px 6px;
+    border-radius: 10px;
+    margin-left: 3px;
+}
+
+
+/* ===== general page stuff ===== */
+
+.container {
+    max-width: 1000px;
+    margin: 25px auto;
+    padding: 0 15px;
+}
+
+.box {
+    background-color: var(--box);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.gray {
+    color: var(--gray-text);
+}
+
+.btn {
+    background-color: var(--button);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 9px 16px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: var(--button-hover);
+}
+
+.btn-gray {
+    background-color: #dddddd;
+    color: #222;
+    border: 1px solid #bbbbbb;
+    border-radius: 4px;
+    padding: 9px 16px;
+    cursor: pointer;
+}
+
+.btn-gray:hover {
+    background-color: #cccccc;
+}
+
+.btn-red {
+    background-color: white;
+    color: #c0392b;
+    border: 1px solid #c0392b;
+    border-radius: 4px;
+    padding: 9px 16px;
+    cursor: pointer;
+}
+
+.btn-red:hover {
+    background-color: #fbeaea;
+}
+
+.hidden {
+    display: none !important;
+}
+
+footer {
+    text-align: center;
+    color: var(--gray-text);
+    font-size: 13px;
+    padding: 20px;
+}
+
+
+/* ===== login page ===== */
+
+.login-box {
+    max-width: 400px;
+    margin: 90px auto 20px auto;
+    text-align: center;
+    background-color: var(--box);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 30px;
+}
+
+.login-box h1 {
+    color: var(--blue);
+    font-size: 32px;
+}
+
+.login-box .btn {
+    margin-top: 15px;
+    width: 100%;
+    padding: 11px;
+}
+
+#status {
+    color: var(--gray-text);
+    font-size: 14px;
+    margin-top: 15px;
+}
+
+
+/* ===== dashboard ===== */
+
+.top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.top-row p {
+    margin: 0;
+}
+
+.filter-row {
+    margin-bottom: 15px;
+}
+
+.filter-row select {
+    padding: 5px;
+    margin-left: 5px;
+}
+
+#event-count {
+    float: right;
+    color: var(--gray-text);
+    margin: 0;
+}
+
+/* "Today", "Tomorrow", etc */
+.date-heading {
+    font-size: 15px;
+    margin: 20px 0 8px 0;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--line);
+}
+
+/* one event in the list (made in dashboard.js) */
+.event-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    text-align: left;
+    background-color: var(--box);
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+
+.event-card:hover {
+    background-color: #f5f8fd;
+}
+
+.event-color {
+    width: 6px;
+    align-self: stretch;
+    background-color: var(--button);
+}
+
+.event-date {
+    width: 95px;
+    color: var(--gray-text);
+    font-size: 13px;
+}
+
+.event-time {
+    width: 75px;
+    font-weight: bold;
+}
+
+.event-title {
+    font-weight: bold;
+    margin: 0 0 3px 0;
+}
+
+.event-meta {
+    color: var(--gray-text);
+    font-size: 13px;
+    margin: 0;
+}
+
+.event-arrow {
+    margin-left: auto;
+    color: var(--gray-text);
+}
+
+#empty-events {
+    text-align: center;
+    color: var(--gray-text);
+    padding: 30px;
+}
+
+
+/* ===== calendar page ===== */
+
+.calendar-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.month-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.month-buttons button {
+    background-color: var(--box);
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 4px 12px;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.month-buttons button:hover {
+    background-color: #dddddd;
+}
+
+#month-year {
+    font-size: 22px;
+    font-weight: bold;
+    min-width: 190px;
+    text-align: center;
+}
+
+.calendar {
+    background-color: var(--box);
+    border: 1px solid var(--line);
+}
+
+.calendar-weekdays,
+.calendar-dates {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.calendar-weekdays div {
+    background-color: var(--blue);
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    padding: 8px;
+}
+
+/* each day square */
+.calendar-dates div {
+    min-height: 105px;
+    padding: 5px;
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.calendar-dates div:nth-child(7n) {
+    border-right: none;
+}
+
+.calendar-dates div:hover {
+    background-color: #eef3fb;
+}
+
+.date-number {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+/* highlight today in yellow */
+.calendar-dates .current-date {
+    background-color: var(--today);
+}
+
+.current-date .date-number {
+    font-weight: bold;
+}
+
+/* the days before the 1st */
+.calendar-dates .empty-date {
+    background-color: #f4f4f4;
+    cursor: default;
+}
+
+.calendar-dates .empty-date:hover {
+    background-color: #f4f4f4;
+}
+
+/* events inside a day (made in calendar.js) */
+.calendar-event {
+    display: block;
+    width: 100%;
+    margin-bottom: 3px;
+    padding: 2px 4px;
+    border: none;
+    border-radius: 3px;
+    color: white;
+    font-size: 12px;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+}
+
+
+/* ===== new event popup ===== */
+
+#event-dialog {
+    width: 95%;
+    max-width: 600px;
+    max-height: 90vh;
+    border: 1px solid #888;
+    border-radius: 4px;
+    padding: 0;
+    background-color: var(--box);
+    color: var(--text);
+}
+
+#event-dialog::backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.dialog-title {
+    background-color: var(--blue);
+    color: white;
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dialog-title h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+#close-event-form {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+#event-form .form-inside {
+    padding: 15px;
+}
+
+/* label + input */
+.form-field {
+    margin-bottom: 12px;
+}
+
+.form-field label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+    width: 100%;
+    padding: 7px;
+    border: 1px solid #aaaaaa;
+    border-radius: 3px;
+    background-color: white;
+    color: #222;
+}
+
+#event-color {
+    height: 36px;
+    padding: 2px;
+}
+
+/* two fields side by side */
+.form-row {
+    display: flex;
+    gap: 12px;
+}
+
+.form-row .form-field {
+    flex: 1;
+}
+
+#event-form-status {
+    color: #c0392b;
+    min-height: 18px;
+    margin: 5px 0;
+}
+
+.form-buttons {
+    text-align: right;
+    border-top: 1px solid var(--line);
+    padding-top: 12px;
+}
+
+
+/* ===== settings ===== */
+
+.settings-field {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.settings-field select,
+.settings-field input {
+    display: block;
+    width: 100%;
+    max-width: 400px;
+    margin-top: 5px;
+    padding: 7px;
+    font-weight: normal;
+    border: 1px solid #aaaaaa;
+    border-radius: 3px;
+}
+
+.settings-field input[readonly] {
+    background-color: #f2f2f2;
+    color: #555;
+}
+
+.profile {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+#profile-photo {
+    width: 80px;
+    height: 80px;
+    border: 1px solid var(--line);
+}
+
+#current-time {
+    font-weight: bold;
+}
+
+#save-status {
+    color: green;
+}
+
+
+/* ===== dark mode =====
+   theme.js sets data-theme="dark" when you pick it in Settings.
+   "System setting" uses the media query instead */
+
+html[data-theme="dark"] {
+    --blue: #16294d;
+    --button: #3f74c9;
+    --button-hover: #5585d4;
+    --bg: #1c1c1c;
+    --box: #2a2a2a;
+    --text: #eeeeee;
+    --gray-text: #aaaaaa;
+    --line: #444444;
+    --today: #4a4320;
+    color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+    html:not([data-theme="light"]) {
+        --blue: #16294d;
+        --button: #3f74c9;
+        --button-hover: #5585d4;
+        --bg: #1c1c1c;
+        --box: #2a2a2a;
+        --text: #eeeeee;
+        --gray-text: #aaaaaa;
+        --line: #444444;
+        --today: #4a4320;
+        color-scheme: dark;
+    }
+}
+
+/* fix hover colors that are hard coded above */
+html[data-theme="dark"] .calendar-dates div:hover,
+html[data-theme="dark"] .event-card:hover {
+    background-color: #33394a;
+}
+
+html[data-theme="dark"] .calendar-dates .empty-date,
+html[data-theme="dark"] .calendar-dates .empty-date:hover {
+    background-color: #222222;
+}
+
+
+/* ===== phones ===== */
+
+@media (max-width: 650px) {
+    .navbar {
+        padding: 10px 15px;
+    }
+
+    .top-row,
+    .calendar-top {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .calendar-dates div {
+        min-height: 65px;
+        font-size: 12px;
+    }
+
+    .event-date {
+        display: none;
+    }
+
+    .profile {
+        flex-direction: column;
+    }
+}
