@@ -35,9 +35,9 @@ async function createEvent(eventData, options = {}) {  //creates a new event
             frequency: repetition,      //how often it repeats
             interval: 1,
             daysOfWeek: [],
-            endType: "never",  //repeats until the user changes it
+            endType: options.repeatCount ? "count" : "never",  //stops after a number of times
             endDate: null,
-            occurrenceCount: null,
+            occurrenceCount: options.repeatCount ?? null,   //how many times it happens
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp()
         });
@@ -131,9 +131,9 @@ async function editEvent(eventId, changes, options = {}) {    //saves changes to
             frequency: repetition,
             interval: 1,
             daysOfWeek: [],
-            endType: "never",
+            endType: options.repeatCount ? "count" : "never",  //stops after a number of times
             endDate: null,
-            occurrenceCount: null,
+            occurrenceCount: options.repeatCount ?? null,   //how many times it happens
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp()
         });
