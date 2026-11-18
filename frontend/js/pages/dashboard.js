@@ -1,7 +1,9 @@
 // Import the Google authentication functions
 import { logOut, watchAuthState } from "../../firebase/auth.js";
 import { getUserEvents } from "../../firebase/events.js";
+import { auth } from "../../firebase/config.js";
 import { getUserProfile } from "../../firebase/users.js";
+import { openEventDetails } from "../event-details.js";
 
 
 // --------------------------------------------------
@@ -220,11 +222,9 @@ date.textContent = new Intl.DateTimeFormat("en-US", {
     eventCard.appendChild(details);
     eventCard.appendChild(arrow);
 
-    // Editing will be connected later
+        // show the event details popup
     eventCard.addEventListener("click", function () {
-        window.alert(
-            "Editing " + event.title + " will be connected later."
-        );
+        openEventDetails(event);
     });
 
     return eventCard;
@@ -383,6 +383,14 @@ async function signOutUser() {
 // --------------------------------------------------
 
 watchAuthState(displayUser);
+
+
+// reload the list after an event is deleted from the popup
+window.addEventListener("timeshift:event-deleted", () => {
+    if (auth.currentUser) {
+        loadDashboardEvents(auth.currentUser.uid);
+    }
+});
 
 eventFilter.addEventListener("change", displayEvents);
 newEventButton.addEventListener("click", openNewEventForm);

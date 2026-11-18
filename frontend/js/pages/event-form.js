@@ -3,14 +3,19 @@
 import { getTimeZones } from "@vvo/tzdb";
 
 // Converts a selected timezone time into UTC
-import { fromZonedTime } from "date-fns-tz";
-
+import { fromZonedTime, formatInTimeZone } from "date-fns-tz";
 // Gives us the currently signed-in Google user
 import { auth } from "../../firebase/config.js";
 
 // Saves the completed event into Firestore
-import { createEvent } from "../../firebase/events.js";
+import { createEvent, editEvent } from "../../firebase/events.js";
 
+// For filling in the form when editing
+import { getEventRepetitions } from "../../firebase/repetitions.js";
+import { getUserReminders } from "../../firebase/reminders.js";
+
+// Delete button (same one the details popup uses)
+import { deleteEventWithConfirm } from "../event-details.js";
 // Defines the fields that belong to an Event
 import Event from "../../models/Event.js";
 
@@ -58,6 +63,31 @@ const endTimeInput =
 // Dropdown where the user selects a timezone
 const timeZoneSelect =
     document.getElementById("event-timezone");
+
+// Popup heading ("New Event" or "Edit Event")
+const formHeading =
+    document.querySelector("#event-dialog .dialog-title h2");
+
+// Save button at the bottom
+const saveButton =
+    document.querySelector("#event-form button[type='submit']");
+
+// Delete button (only shows when editing)
+const deleteButton =
+    document.getElementById("delete-event");
+
+// null = making a new event, otherwise the event being edited
+let editingEvent = null;
+
+// Repeat dropdown + the "How many times?" box under it
+const repeatSelect =
+    document.getElementById("event-repeat");
+
+const repeatCountField =
+    document.getElementById("repeat-count-field");
+
+const repeatCountInput =
+    document.getElementById("event-repeat-count");
 
 
 // --------------------------------------------------
@@ -182,6 +212,16 @@ function openEventForm() {
     // Remove an old error or success message.
     clearStatusMessage();
 
+    // If the form was last used for editing, clear it out
+    // but keep the date in case a calendar day was clicked
+    if (editingEvent) {
+        const pickedDate = dateInput.value;
+        eventForm.reset();
+        setNewMode();
+        selectUserTimeZone();
+        dateInput.value = pickedDate;
+    }
+
     // If the event date is blank, automatically
     // start it with today's date.
     if (!dateInput.value) {
@@ -221,6 +261,9 @@ function cancelEventForm() {
     // Select the user's timezone again because reset()
     // may change the dropdown back to its first option.
     selectUserTimeZone();
+
+    // Go back to "New Event" mode
+    setNewMode();
 
     // Close the popup.
     closeEventForm();
@@ -343,12 +386,24 @@ async function submitEventForm(event) {
             ? null
             : Number(reminderValue);
 
+        // how many times it repeats (null if it doesn't repeat)
+        const repeatCount = repetition === "none"
+            ? null
+            : Number(formData.get("repeatCount"));
+        
+        // editing an event that already exists
+        if (editingEvent) {
+            await saveEditedEvent(eventModel, repetition, reminderMinutes, repeatCount);            
+            return;
+        }
+
         // Convert the model into Firestore data and save it
         const eventId = await createEvent(
             eventModel.toFirestore(),
             {
                 repetition,
-                reminderMinutes
+                reminderMinutes,
+                repeatCount
             }
         );
 
@@ -368,6 +423,7 @@ async function submitEventForm(event) {
         eventForm.reset();
         dateInput.value = getToday();
         selectUserTimeZone();
+        showOrHideRepeatCount();
 
         // Briefly show the success message, then close
         setTimeout(() => {
@@ -382,6 +438,148 @@ async function submitEventForm(event) {
     }
 }
 
+// --------------------------------------------------
+// Edit mode
+// --------------------------------------------------
+
+// Puts the popup back to "New Event"
+function setNewMode() {
+    editingEvent = null;
+    formHeading.textContent = "New Event";
+    saveButton.textContent = "Save Event";
+    deleteButton.hidden = true;
+    showOrHideRepeatCount();
+}
+
+// Only show "How many times?" when the event repeats
+function showOrHideRepeatCount() {
+    const repeats = repeatSelect.value !== "none";
+
+    repeatCountField.hidden = !repeats;
+    repeatCountInput.required = repeats;
+}
+
+// Firebase gives back a Timestamp, so turn it into a Date
+function toDate(value) {
+    if (!value) {
+        return null;
+    }
+    if (value.toDate) {
+        return value.toDate();
+    }
+    return new Date(value);
+}
+
+// Opens the popup with an event's info already filled in
+async function openEditForm(event) {
+    clearStatusMessage();
+    eventForm.reset();
+
+    editingEvent = event;
+    formHeading.textContent = "Edit Event";
+    saveButton.textContent = "Save Changes";
+    deleteButton.hidden = false;
+    showOrHideRepeatCount();
+
+    const start = toDate(event.startAt);
+    const end = toDate(event.endAt);
+
+    // show the times in the time zone it was made in
+    const zone = event.timeZone || "UTC";
+
+    document.getElementById("event-title").value = event.title || "";
+    document.getElementById("event-calendar").value = event.calendarId || "personal";
+    dateInput.value = formatInTimeZone(start, zone, "yyyy-MM-dd");
+    timeZoneSelect.value = zone;
+    startTimeInput.value = formatInTimeZone(start, zone, "HH:mm");
+    endTimeInput.value = end ? formatInTimeZone(end, zone, "HH:mm") : "";
+    document.getElementById("event-location").value = event.location || "";
+    document.getElementById("event-meeting-link").value = event.meetingLink || "";
+    document.getElementById("event-description").value = event.description || "";
+    document.getElementById("event-category").value = event.category || "";
+    document.getElementById("event-color").value = event.color || "#5f8a3a";
+
+    eventDialog.showModal();
+
+       // repeat + reminder are saved separately so load them
+    try {
+        if (event.repetitionId) {
+            const repetitions = await getEventRepetitions(event.id);
+
+            if (repetitions[0]) {
+                document.getElementById("event-repeat").value =
+                    repetitions[0].frequency;
+
+                // old events might not have a count saved
+                if (repetitions[0].occurrenceCount) {
+                    repeatCountInput.value = repetitions[0].occurrenceCount;
+                }
+            }
+        }
+
+        showOrHideRepeatCount();
+
+        const reminders = await getUserReminders(auth.currentUser.uid);
+        const reminder = reminders.find((item) => item.eventId === event.id);
+        if (reminder) {
+            document.getElementById("event-reminder").value =
+                String(reminder.minutesBefore);
+        }
+    } catch (error) {
+        console.error("couldn't load repeat/reminder", error);
+    }
+}
+
+// Saves the changes to Firestore
+async function saveEditedEvent(eventModel, repetition, reminderMinutes, repeatCount) {    // only the fields from the form (not createdBy, createdAt, etc)
+    const changes = {
+        calendarId: eventModel.calendarId,
+        title: eventModel.title,
+        description: eventModel.description,
+        startAt: eventModel.startAt,
+        endAt: eventModel.endAt,
+        timeZone: eventModel.timeZone,
+        location: eventModel.location,
+        meetingLink: eventModel.meetingLink,
+        category: eventModel.category,
+        color: eventModel.color
+    };
+
+    await editEvent(editingEvent.id, changes, {
+        repetition: repetition,
+        reminderMinutes: reminderMinutes,
+        repeatCount: repeatCount,
+        oldRepetitionId: editingEvent.repetitionId,
+        userId: auth.currentUser.uid
+    });
+
+    statusMessage.textContent = "Changes saved!";
+
+    // tells the calendar to reload
+    window.dispatchEvent(new CustomEvent("timeshift:event-saved"));
+
+    setTimeout(() => {
+        eventForm.reset();
+        setNewMode();
+        dateInput.value = getToday();
+        selectUserTimeZone();
+        closeEventForm();
+        clearStatusMessage();
+    }, 700);
+}
+
+// Delete button inside the edit form
+async function deleteFromForm() {
+    const deleted = await deleteEventWithConfirm(editingEvent);
+
+    if (deleted) {
+        eventForm.reset();
+        setNewMode();
+        dateInput.value = getToday();
+        selectUserTimeZone();
+        closeEventForm();
+    }
+}
 
 // --------------------------------------------------
 // 12. Close when the dark background is clicked
@@ -435,3 +633,22 @@ eventDialog.addEventListener(
     "click",
     closeWhenBackgroundIsClicked
 );
+
+
+// Open the form in edit mode (sent from the details popup)
+window.addEventListener("timeshift:edit-event", (event) => {
+    openEditForm(event.detail);
+});
+
+// Delete button in the edit form
+deleteButton.addEventListener(
+    "click",
+    deleteFromForm
+);
+
+// Show "How many times?" when Repeat changes
+repeatSelect.addEventListener(
+    "change",
+    showOrHideRepeatCount
+);
+

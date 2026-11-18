@@ -2,6 +2,8 @@ import { onAuthStateChanged } from "firebase/auth";
 
 import { auth } from "../../firebase/config.js";
 import { getUserEvents } from "../../firebase/events.js";
+import { openEventDetails } from "../event-details.js";
+import { addRepeatInfo, getOccurrencesBetween } from "../repeats.js";
 
 
 // ---------- Calendar elements ----------
@@ -38,6 +40,9 @@ const today = new Date();
 let currentMonth = today.getMonth();
 let currentYear = today.getFullYear();
 let savedEvents = [];
+
+// events for the month on screen (includes repeats)
+let monthEvents = [];
 
 
 // ---------- Timezone helpers ----------
@@ -91,9 +96,9 @@ function formatEventTime(event) {
 // ---------- Find events for one date ----------
 
 function getEventsForDate(year, month, day) {
-    return savedEvents.filter((event) => {
+    return monthEvents.filter((event) => {        
         const eventDate = getEventDateParts(event);
-
+        
         return (
             eventDate.year === year &&
             eventDate.month === month &&
@@ -119,10 +124,8 @@ function createEventLabel(event) {
     eventLabel.addEventListener("click", (clickEvent) => {
         clickEvent.stopPropagation();
 
-        // This will later become the Edit Event popup
-        window.alert(
-            `${event.title}\n${formatEventTime(event)}`
-        );
+        // show the event details popup
+        openEventDetails(event);
     });
 
     return eventLabel;
@@ -134,6 +137,22 @@ function createEventLabel(event) {
 function renderCalendar(month, year) {
     calendarDates.replaceChildren();
     monthYear.textContent = `${months[month]} ${year}`;
+
+    // get every event (and repeat) that happens this month.
+    // 2 extra days on each side because of time zones
+    const rangeStart = new Date(year, month, 1 - 2);
+    const rangeEnd = new Date(year, month + 1, 1 + 2);
+
+    monthEvents = [];
+    savedEvents.forEach((event) => {
+        const copies = getOccurrencesBetween(event, rangeStart, rangeEnd);
+        monthEvents.push(...copies);
+    });
+
+    // earliest first so each day is in order
+    monthEvents.sort((first, second) => {
+        return getEventDate(first) - getEventDate(second);
+    });
 
     const firstDay =
         new Date(year, month, 1).getDay();
@@ -189,6 +208,9 @@ function renderCalendar(month, year) {
 async function loadEvents(userId) {
     try {
         savedEvents = await getUserEvents(userId);
+        
+        // finds out which events repeat (daily, weekly, etc)
+        await addRepeatInfo(savedEvents);
 
         savedEvents.sort((firstEvent, secondEvent) => {
             return (
@@ -198,6 +220,7 @@ async function loadEvents(userId) {
         });
 
         renderCalendar(currentMonth, currentYear);
+        openEditFromLink();
     } catch (error) {
         console.error("Unable to load events:", error);
     }
@@ -248,13 +271,46 @@ calendarDates.addEventListener("click", (event) => {
 });
 
 
-// ---------- Refresh after saving ----------
+// ---------- Refresh after saving or deleting ----------
 
-window.addEventListener("timeshift:event-saved", () => {
+function reloadEvents() {
     if (auth.currentUser) {
         loadEvents(auth.currentUser.uid);
     }
-});
+}
+
+window.addEventListener("timeshift:event-saved", reloadEvents);
+window.addEventListener("timeshift:event-deleted", reloadEvents);
+
+
+// ---------- Edit link from the dashboard ----------
+
+// the dashboard sends people to calendar.html?edit=EVENT_ID
+function openEditFromLink() {
+    const params = new URLSearchParams(window.location.search);
+    const eventId = params.get("edit");
+
+    if (!eventId) {
+        return;
+    }
+
+    // take ?edit= off the address so refreshing doesn't reopen it
+    window.history.replaceState(null, "", window.location.pathname);
+
+    const event = savedEvents.find((item) => item.id === eventId);
+
+    if (event) {
+        // go to that event's month
+        const date = getEventDateParts(event);
+        currentMonth = date.month;
+        currentYear = date.year;
+        renderCalendar(currentMonth, currentYear);
+
+        window.dispatchEvent(
+            new CustomEvent("timeshift:edit-event", { detail: event })
+        );
+    }
+}
 
 
 // ---------- Start calendar ----------
