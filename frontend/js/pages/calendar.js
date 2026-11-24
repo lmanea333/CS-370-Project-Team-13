@@ -25,6 +25,9 @@ const newEventButton =
 
 const eventDateInput =
     document.getElementById("event-date");
+// Dropdown used to show all events or one calendar.
+const calendarFilter =
+    document.getElementById("calendar-filter");
 
 
 // ---------- Calendar information ----------
@@ -54,15 +57,36 @@ function getUserTimeZone() {
     );
 }
 
-function getEventDate(event) {
-    if (event.startAt?.toDate) {
-        return event.startAt.toDate();
+// Convert a Firestore Timestamp or saved date value
+// into a regular JavaScript Date.
+function convertStoredDate(value) {
+    if (!value) {
+        return null;
     }
 
-    return new Date(event.startAt);
+    if (value.toDate) {
+        return value.toDate();
+    }
+
+    return new Date(value);
 }
 
-function getEventDateParts(event) {
+
+// Get the date and time when an event begins.
+function getEventDate(event) {
+    return convertStoredDate(event.startAt);
+}
+
+
+// Get the date and time when an event ends.
+function getEventEndDate(event) {
+    return convertStoredDate(event.endAt);
+}
+
+
+// Get a date's year, month, and day in the
+// timezone selected by the current user.
+function getDateParts(date) {
     const formatter = new Intl.DateTimeFormat("en-US", {
         timeZone: getUserTimeZone(),
         year: "numeric",
@@ -70,12 +94,12 @@ function getEventDateParts(event) {
         day: "numeric"
     });
 
-    const parts = formatter.formatToParts(
-        getEventDate(event)
-    );
+    const parts = formatter.formatToParts(date);
 
     const value = (name) =>
-        Number(parts.find((part) => part.type === name).value);
+        Number(
+            parts.find((part) => part.type === name).value
+        );
 
     return {
         year: value("year"),
@@ -83,6 +107,49 @@ function getEventDateParts(event) {
         day: value("day")
     };
 }
+
+
+// Get the calendar date on which an event begins.
+function getEventDateParts(event) {
+    return getDateParts(getEventDate(event));
+}
+
+
+// Get the final calendar date occupied by an event.
+function getEventLastDateParts(event) {
+    const start = getEventDate(event);
+    const end = getEventEndDate(event);
+
+    // Events without an ending time only appear
+    // on their starting date.
+    if (!end || end <= start) {
+        return getDateParts(start);
+    }
+
+    /*
+        Treat the ending time as exclusive by checking
+        one millisecond before it.
+
+        For example, an event ending exactly at midnight
+        does not incorrectly occupy the following day.
+    */
+    const finalOccupiedMoment =
+        new Date(end.getTime() - 1);
+
+    return getDateParts(finalOccupiedMoment);
+}
+
+
+// Turn date parts into a number that can be compared.
+// For example, November 25, 2026 becomes 20261125.
+function datePartsToNumber(parts) {
+    return (
+        parts.year * 10000 +
+        (parts.month + 1) * 100 +
+        parts.day
+    );
+}
+
 
 function formatEventTime(event) {
     return new Intl.DateTimeFormat("en-US", {
@@ -96,18 +163,35 @@ function formatEventTime(event) {
 // ---------- Find events for one date ----------
 
 function getEventsForDate(year, month, day) {
-    return monthEvents.filter((event) => {        
-        const eventDate = getEventDateParts(event);
-        
+    const selectedDateNumber =
+        datePartsToNumber({ year, month, day });
+
+    return monthEvents.filter((event) => {
+        // Skip events that do not belong to the selected calendar.
+if (
+    calendarFilter.value !== "all" &&
+    event.calendarId !== calendarFilter.value
+) {
+    return false;
+}
+        const startingDateNumber =
+            datePartsToNumber(
+                getEventDateParts(event)
+            );
+
+        const endingDateNumber =
+            datePartsToNumber(
+                getEventLastDateParts(event)
+            );
+
+        // Include the event on every calendar date
+        // from its starting date through its ending date.
         return (
-            eventDate.year === year &&
-            eventDate.month === month &&
-            eventDate.day === day
+            selectedDateNumber >= startingDateNumber &&
+            selectedDateNumber <= endingDateNumber
         );
     });
 }
-
-
 // ---------- Create one event label ----------
 
 function createEventLabel(event) {
@@ -225,7 +309,10 @@ async function loadEvents(userId) {
         console.error("Unable to load events:", error);
     }
 }
-
+// Redraw the calendar when a different calendar is selected.
+calendarFilter.addEventListener("change", () => {
+    renderCalendar(currentMonth, currentYear);
+});
 
 // ---------- Month buttons ----------
 

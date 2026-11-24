@@ -51,6 +51,10 @@ const statusMessage =
 // Input where the user selects the event date
 const dateInput =
     document.getElementById("event-date");
+// Input where the user selects the date when the event ends.
+// This allows events to continue past midnight or span multiple days.
+const endDateInput =
+    document.getElementById("event-end-date");
 
 // Input where the user selects the starting time
 const startTimeInput =
@@ -116,6 +120,28 @@ function getToday() {
     // HTML date inputs require the format YYYY-MM-DD.
     // An example is 2026-11-05.
     return year + "-" + month + "-" + day;
+}
+
+// Keep the ending date on or after the starting date.
+function syncEndDateWithStart() {
+    const startDate = dateInput.value;
+
+    if (!startDate) {
+        return;
+    }
+
+    // Prevent the user from selecting an end date
+    // that occurs before the starting date.
+    endDateInput.min = startDate;
+
+    // Automatically use the starting date when the
+    // ending date is empty or is now too early.
+    if (
+        !endDateInput.value ||
+        endDateInput.value < startDate
+    ) {
+        endDateInput.value = startDate;
+    }
 }
 
 
@@ -227,6 +253,8 @@ function openEventForm() {
     if (!dateInput.value) {
         dateInput.value = getToday();
     }
+    // Start new events with the same starting and ending date.
+syncEndDateWithStart();
 
     // showModal displays the dialog as a popup and
     // darkens the page behind it.
@@ -274,34 +302,48 @@ function cancelEventForm() {
 // 9. Validate the start and end times
 // --------------------------------------------------
 
+
+// Check that the complete ending date and time
+// occur after the complete starting date and time.
 function eventTimesAreValid() {
-    // Read the selected starting time.
+    const startDate = dateInput.value;
     const startTime = startTimeInput.value;
-
-    // Read the selected ending time.
     const endTime = endTimeInput.value;
+    const timeZone = timeZoneSelect.value;
 
-    // The ending time is optional.
-    // If the user did not enter one, the times are valid.
+    // End time is optional. An event without one
+    // is allowed to have no ending date and time.
     if (!endTime) {
         return true;
     }
 
-    // HTML time values use a 24-hour format such as 09:30.
-    // Because of that format, they can be compared directly.
-    if (endTime <= startTime) {
-        // Explain the problem to the user.
+    // If no separate end date was selected,
+    // treat the event as ending on its start date.
+    const endDate =
+        endDateInput.value || startDate;
+
+    // Convert both selected date-times into actual UTC times.
+    // This allows the comparison to work across midnight,
+    // multiple days, and different daylight-saving offsets.
+    const startAt = fromZonedTime(
+        `${startDate}T${startTime}:00`,
+        timeZone
+    );
+
+    const endAt = fromZonedTime(
+        `${endDate}T${endTime}:00`,
+        timeZone
+    );
+
+    // The event must finish after it begins.
+    if (endAt <= startAt) {
         statusMessage.textContent =
-            "End time must be later than start time.";
+            "The ending date and time must be after the starting date and time.";
 
-        // Move the typing focus to the incorrect field.
         endTimeInput.focus();
-
-        // False means the form should not continue.
         return false;
     }
 
-    // True means the selected times are acceptable.
     return true;
 }
 
@@ -311,26 +353,40 @@ function eventTimesAreValid() {
 // --------------------------------------------------
 
 // Create an Event model from the form information
+// Create an Event model from the information entered in the form.
 function createEventDraft() {
     const formData = new FormData(eventForm);
 
-    const date = formData.get("date");
+    const startDate = formData.get("date");
     const startTime = formData.get("startTime");
+
     const endTime = formData.get("endTime");
+
+    // If no separate end date was selected,
+    // use the starting date as the ending date.
+    const endDate =
+        formData.get("endDate") || startDate;
+
     const timeZone = formData.get("timeZone");
 
-    // Convert the selected event time into UTC
+    // Convert the selected starting date and time
+    // from the event's timezone into UTC.
     const startAt = fromZonedTime(
-        `${date}T${startTime}:00`,
+        `${startDate}T${startTime}:00`,
         timeZone
     );
 
-    // End time is optional
+    // The ending time is optional.
+    // When one is entered, use the separate ending date.
     const endAt = endTime
-        ? fromZonedTime(`${date}T${endTime}:00`, timeZone)
+        ? fromZonedTime(
+            `${endDate}T${endTime}:00`,
+            timeZone
+        )
         : null;
 
-    const userId = auth.currentUser?.uid ?? null;
+    const userId =
+        auth.currentUser?.uid ?? null;
 
     return new Event({
         calendarId: formData.get("calendarId"),
@@ -489,10 +545,23 @@ async function openEditForm(event) {
 
     document.getElementById("event-title").value = event.title || "";
     document.getElementById("event-calendar").value = event.calendarId || "personal";
-    dateInput.value = formatInTimeZone(start, zone, "yyyy-MM-dd");
-    timeZoneSelect.value = zone;
-    startTimeInput.value = formatInTimeZone(start, zone, "HH:mm");
-    endTimeInput.value = end ? formatInTimeZone(end, zone, "HH:mm") : "";
+    // Restore the event's starting date and time.
+dateInput.value =
+    formatInTimeZone(start, zone, "yyyy-MM-dd");
+startTimeInput.value =
+    formatInTimeZone(start, zone, "HH:mm");
+// Restore the event's ending date and time.
+// Events without an ending time use the starting date.
+endDateInput.value = end
+    ? formatInTimeZone(end, zone, "yyyy-MM-dd")
+    : dateInput.value;
+endTimeInput.value = end
+    ? formatInTimeZone(end, zone, "HH:mm")
+    : "";
+// Restore the timezone used when the event was created.
+timeZoneSelect.value = zone;
+// Prevent selecting an ending date before the starting date.
+endDateInput.min = dateInput.value;
     document.getElementById("event-location").value = event.location || "";
     document.getElementById("event-meeting-link").value = event.meetingLink || "";
     document.getElementById("event-description").value = event.description || "";
@@ -652,3 +721,8 @@ repeatSelect.addEventListener(
     showOrHideRepeatCount
 );
 
+// Keep the ending date valid when the starting date changes.
+dateInput.addEventListener(
+    "change",
+    syncEndDateWithStart
+);
