@@ -298,6 +298,23 @@ footer {
     align-items: center;
     margin-bottom: 12px;
 }
+/* Calendar filter and action buttons */
+.calendar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#calendar-filter {
+    min-width: 150px;
+    padding: 7px 10px;
+    background-color: var(--box);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+}
 
 .month-buttons {
     display: flex;
@@ -393,7 +410,8 @@ footer {
 
 /* ---------- new event popup ---------- */
 
-#event-dialog {
+#event-dialog,
+#calendar-dialog {
     width: 95%;
     max-width: 600px;
     max-height: 90vh;
@@ -418,7 +436,8 @@ footer {
     color: var(--dark-green);
 }
 
-#close-event-form {
+#close-event-form,
+#close-calendar-form {
     background: none;
     border: none;
     font-size: 24px;
@@ -640,6 +659,14 @@ html[data-theme="dark"] {
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;
+        .calendar-actions {
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+#calendar-filter {
+    flex: 1;
+}
     }
 
     .form-row {

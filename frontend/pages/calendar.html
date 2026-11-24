@@ -10,8 +10,12 @@
 </head>
 <body>
 
+    <!-- Navigation -->
     <div class="navbar">
-        <a class="logo" href="./dashboard.html"><img src="../images/globe.svg" alt="">TimeShift</a>
+        <a class="logo" href="./dashboard.html">
+            <img src="../images/globe.svg" alt="">TimeShift
+        </a>
+
         <nav>
             <a href="./dashboard.html">Dashboard</a>
             <a class="active" href="./calendar.html">Calendar</a>
@@ -19,99 +23,254 @@
         </nav>
     </div>
 
-    <div class="container">
+    <!-- Calendar page -->
+<div class="container">
 
-        <div class="calendar-top">
-            <div class="month-buttons">
-                <button id="prev-month" type="button">&lt;</button>
-                <div id="month-year"></div>
-                <button id="next-month" type="button">&gt;</button>
-            </div>
-            <button id="open-event-form" class="btn" type="button">+ New Event</button>
+    <!-- Calendar toolbar -->
+    <div class="calendar-top">
+
+        <!-- Month navigation -->
+        <div class="month-buttons">
+            <button id="prev-month" type="button">&lt;</button>
+            <div id="month-year"></div>
+            <button id="next-month" type="button">&gt;</button>
         </div>
 
-        <div class="calendar">
-            <div class="calendar-weekdays">
-                <div>Sun</div>
-                <div>Mon</div>
-                <div>Tue</div>
-                <div>Wed</div>
-                <div>Thu</div>
-                <div>Fri</div>
-                <div>Sat</div>
-            </div>
-            <!-- calendar.js fills in the days -->
-            <div class="calendar-dates"></div>
-        </div>
+        <!-- Calendar filtering and creation controls -->
+        <div class="calendar-actions">
 
+            <!-- Choose which calendar is displayed -->
+            <select
+                id="calendar-filter"
+                aria-label="Filter events by calendar"
+            >
+                <option value="all">All Calendars</option>
+                <option value="personal">My Calendar</option>
+            </select>
+
+            <!-- Opens the Create Calendar popup -->
+            <button
+                id="open-calendar-form"
+                class="btn-gray"
+                type="button"
+            >
+                + Calendar
+            </button>
+
+            <!-- Opens the New Event popup -->
+            <button
+                id="open-event-form"
+                class="btn"
+                type="button"
+            >
+                + New Event
+            </button>
+
+        </div>
     </div>
 
+    <!-- Monthly calendar -->
+    <div class="calendar">
 
-    <!-- New Event popup -->
+        <div class="calendar-weekdays">
+            <div>Sun</div>
+            <div>Mon</div>
+            <div>Tue</div>
+            <div>Wed</div>
+            <div>Thu</div>
+            <div>Fri</div>
+            <div>Sat</div>
+        </div>
+
+        <!-- calendar.js fills in the dates -->
+        <div class="calendar-dates"></div>
+
+    </div>
+</div>
+
+    <!-- Create Calendar popup -->
+<dialog id="calendar-dialog">
+    <form id="calendar-form">
+
+        <div class="dialog-title">
+            <h2>New Calendar</h2>
+
+            <!-- Closes the popup -->
+            <button
+                id="close-calendar-form"
+                type="button"
+                aria-label="Close"
+            >
+                &times;
+            </button>
+        </div>
+
+        <div class="form-inside">
+
+            <!-- Calendar name -->
+            <div class="form-field">
+                <label for="calendar-name">Calendar name *</label>
+
+                <input
+                    id="calendar-name"
+                    name="name"
+                    type="text"
+                    maxlength="50"
+                    placeholder="Example: School"
+                    required
+                >
+            </div>
+
+            <!-- Optional calendar description -->
+            <div class="form-field">
+                <label for="calendar-description">Description</label>
+
+                <textarea
+                    id="calendar-description"
+                    name="description"
+                    rows="2"
+                    maxlength="200"
+                ></textarea>
+            </div>
+
+            <!-- Color used for this calendar -->
+            <div class="form-field">
+                <label for="calendar-color">Color</label>
+
+                <input
+                    id="calendar-color"
+                    name="color"
+                    type="color"
+                    value="#2a5db0"
+                >
+            </div>
+
+            <!-- Error or success message -->
+            <p id="calendar-form-status"></p>
+
+            <div class="form-buttons">
+                <button
+                    id="cancel-calendar"
+                    class="btn-gray"
+                    type="button"
+                >
+                    Cancel
+                </button>
+
+                <button class="btn" type="submit">
+                    Create Calendar
+                </button>
+            </div>
+
+        </div>
+    </form>
+</dialog>
+    <!-- New Event and Edit Event popup -->
     <dialog id="event-dialog">
         <form id="event-form">
 
             <div class="dialog-title">
                 <h2>New Event</h2>
-                <button id="close-event-form" type="button" aria-label="Close">&times;</button>
+
+                <button
+                    id="close-event-form"
+                    type="button"
+                    aria-label="Close"
+                >
+                    &times;
+                </button>
             </div>
 
             <div class="form-inside">
 
+                <!-- Event title -->
                 <div class="form-field">
                     <label for="event-title">Title *</label>
                     <input id="event-title" name="title" type="text" required>
                 </div>
 
+                <!-- Calendar selection -->
                 <div class="form-field">
                     <label for="event-calendar">Calendar *</label>
+
                     <select id="event-calendar" name="calendarId" required>
                         <option value="personal">My Calendar</option>
                     </select>
                 </div>
 
+                <!-- Starting date and time -->
                 <div class="form-row">
                     <div class="form-field">
-                        <label for="event-date">Date *</label>
+                        <label for="event-date">Start date *</label>
                         <input id="event-date" name="date" type="date" required>
                     </div>
-                    <div class="form-field">
-                        <label for="event-timezone">Time zone *</label>
-                        <select id="event-timezone" name="timeZone" required>
-                            <option value="">Select a time zone</option>
-                        </select>
-                    </div>
-                </div>
 
-                <div class="form-row">
                     <div class="form-field">
                         <label for="event-start-time">Start time *</label>
                         <input id="event-start-time" name="startTime" type="time" required>
                     </div>
+                </div>
+
+                <!--
+                    Ending date and time.
+                    A separate end date allows events to continue
+                    past midnight or span multiple days.
+                -->
+                <div class="form-row">
+                    <div class="form-field">
+                        <label for="event-end-date">End date</label>
+                        <input id="event-end-date" name="endDate" type="date">
+                    </div>
+
                     <div class="form-field">
                         <label for="event-end-time">End time</label>
                         <input id="event-end-time" name="endTime" type="time">
                     </div>
                 </div>
 
+                <!-- Time zone used when saving the event -->
+                <div class="form-field">
+                    <label for="event-timezone">Time zone *</label>
+
+                    <select id="event-timezone" name="timeZone" required>
+                        <option value="">Select a time zone</option>
+                    </select>
+                </div>
+
+                <!-- Event location -->
                 <div class="form-field">
                     <label for="event-location">Location</label>
                     <input id="event-location" name="location" type="text">
                 </div>
 
+                <!-- Optional online meeting link -->
                 <div class="form-field">
                     <label for="event-meeting-link">Meeting link</label>
-                    <input id="event-meeting-link" name="meetingLink" type="url" placeholder="https://">
+
+                    <input
+                        id="event-meeting-link"
+                        name="meetingLink"
+                        type="url"
+                        placeholder="https://"
+                    >
                 </div>
 
+                <!-- Optional description -->
                 <div class="form-field">
                     <label for="event-description">Description</label>
-                    <textarea id="event-description" name="description" rows="3"></textarea>
+
+                    <textarea
+                        id="event-description"
+                        name="description"
+                        rows="3"
+                    ></textarea>
                 </div>
 
+                <!-- Category and event color -->
                 <div class="form-row">
                     <div class="form-field">
                         <label for="event-category">Category</label>
+
                         <select id="event-category" name="category">
                             <option value="">None</option>
                             <option value="school">School</option>
@@ -120,15 +279,24 @@
                             <option value="appointment">Appointment</option>
                         </select>
                     </div>
+
                     <div class="form-field">
                         <label for="event-color">Color</label>
-                        <input id="event-color" name="color" type="color" value="#2a5db0">
+
+                        <input
+                            id="event-color"
+                            name="color"
+                            type="color"
+                            value="#2a5db0"
+                        >
                     </div>
                 </div>
 
+                <!-- Repeat and reminder settings -->
                 <div class="form-row">
                     <div class="form-field">
                         <label for="event-repeat">Repeat</label>
+
                         <select id="event-repeat" name="repetition">
                             <option value="none">Does not repeat</option>
                             <option value="daily">Daily</option>
@@ -137,8 +305,10 @@
                             <option value="yearly">Yearly</option>
                         </select>
                     </div>
+
                     <div class="form-field">
                         <label for="event-reminder">Reminder</label>
+
                         <select id="event-reminder" name="reminderMinutes">
                             <option value="none">No reminder</option>
                             <option value="10">10 minutes before</option>
@@ -149,17 +319,41 @@
                     </div>
                 </div>
 
+                <!-- Only shown when the event repeats -->
                 <div class="form-field" id="repeat-count-field" hidden>
                     <label for="event-repeat-count">How many times? *</label>
-                    <input id="event-repeat-count" name="repeatCount" type="number" min="2" max="365" value="10">
+
+                    <input
+                        id="event-repeat-count"
+                        name="repeatCount"
+                        type="number"
+                        min="2"
+                        max="365"
+                        value="10"
+                    >
                 </div>
-                
+
+                <!-- Error or success message -->
                 <p id="event-form-status"></p>
 
+                <!-- Form buttons -->
                 <div class="form-buttons">
-                    <button id="delete-event" class="btn-red left-button" type="button" hidden>Delete</button>
-                    <button id="cancel-event" class="btn-gray" type="button">Cancel</button>
-                    <button class="btn" type="submit">Save Event</button>
+                    <button
+                        id="delete-event"
+                        class="btn-red left-button"
+                        type="button"
+                        hidden
+                    >
+                        Delete
+                    </button>
+
+                    <button id="cancel-event" class="btn-gray" type="button">
+                        Cancel
+                    </button>
+
+                    <button class="btn" type="submit">
+                        Save Event
+                    </button>
                 </div>
 
             </div>
@@ -168,5 +362,6 @@
 
     <script type="module" src="../js/pages/calendar.js"></script>
     <script type="module" src="../js/pages/event-form.js"></script>
+    <script type="module" src="../js/pages/calendar-manager.js"></script>
 </body>
 </html>
