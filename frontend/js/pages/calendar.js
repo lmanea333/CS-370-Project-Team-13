@@ -6,7 +6,7 @@ import { openEventDetails } from "../event-details.js";
 import { addRepeatInfo, getOccurrencesBetween } from "../repeats.js";
 
 
-// ---------- Calendar elements ----------
+// Calendar elements
 
 const calendarDates =
     document.querySelector(".calendar-dates");
@@ -30,7 +30,7 @@ const calendarFilter =
     document.getElementById("calendar-filter");
 
 
-// ---------- Calendar information ----------
+// Calendar information
 
 const months = [
     "January", "February", "March", "April",
@@ -44,11 +44,11 @@ let currentMonth = today.getMonth();
 let currentYear = today.getFullYear();
 let savedEvents = [];
 
-// events for the month on screen (includes repeats)
+// Events for the month on screen (includes repeats)
 let monthEvents = [];
 
 
-// ---------- Timezone helpers ----------
+// Timezone helpers
 
 function getUserTimeZone() {
     return (
@@ -126,13 +126,7 @@ function getEventLastDateParts(event) {
         return getDateParts(start);
     }
 
-    /*
-        Treat the ending time as exclusive by checking
-        one millisecond before it.
-
-        For example, an event ending exactly at midnight
-        does not incorrectly occupy the following day.
-    */
+    /* Treat the ending time as exclusive by checking one millisecond before it. For example, an event ending exactly at midnight does not incorrectly occupy the following day. */
     const finalOccupiedMoment =
         new Date(end.getTime() - 1);
 
@@ -160,7 +154,7 @@ function formatEventTime(event) {
 }
 
 
-// ---------- Find events for one date ----------
+// Find events for one date
 
 function getEventsForDate(year, month, day) {
     const selectedDateNumber =
@@ -192,7 +186,7 @@ if (
         );
     });
 }
-// ---------- Create one event label ----------
+// Create one event label
 
 function createEventLabel(event) {
     const eventLabel = document.createElement("button");
@@ -208,7 +202,7 @@ function createEventLabel(event) {
     eventLabel.addEventListener("click", (clickEvent) => {
         clickEvent.stopPropagation();
 
-        // show the event details popup
+        // Show the event details popup
         openEventDetails(event);
     });
 
@@ -216,14 +210,14 @@ function createEventLabel(event) {
 }
 
 
-// ---------- Draw the calendar ----------
+// Draw the calendar
 
 function renderCalendar(month, year) {
     calendarDates.replaceChildren();
     monthYear.textContent = `${months[month]} ${year}`;
 
-    // get every event (and repeat) that happens this month.
-    // 2 extra days on each side because of time zones
+    // Expand the repeat dates for the month on screen.
+    // Check two extra days on both sides so time-zone conversions don't drop events near a month boundary.
     const rangeStart = new Date(year, month, 1 - 2);
     const rangeEnd = new Date(year, month + 1, 1 + 2);
 
@@ -233,7 +227,7 @@ function renderCalendar(month, year) {
         monthEvents.push(...copies);
     });
 
-    // earliest first so each day is in order
+    // Earliest first so each day is in order
     monthEvents.sort((first, second) => {
         return getEventDate(first) - getEventDate(second);
     });
@@ -287,13 +281,13 @@ function renderCalendar(month, year) {
 }
 
 
-// ---------- Load Firebase events ----------
+// Load Firebase events
 
 async function loadEvents(userId) {
     try {
         savedEvents = await getUserEvents(userId);
         
-        // finds out which events repeat (daily, weekly, etc)
+        // Finds out which events repeat (daily, weekly, etc)
         await addRepeatInfo(savedEvents);
 
         savedEvents.sort((firstEvent, secondEvent) => {
@@ -314,7 +308,7 @@ calendarFilter.addEventListener("change", () => {
     renderCalendar(currentMonth, currentYear);
 });
 
-// ---------- Month buttons ----------
+// Month buttons
 
 previousButton.addEventListener("click", () => {
     currentMonth--;
@@ -339,7 +333,7 @@ nextButton.addEventListener("click", () => {
 });
 
 
-// ---------- Open the form from a date ----------
+// Open the form from a date
 
 calendarDates.addEventListener("click", (event) => {
     const dateCell = event.target.closest(".calendar-date");
@@ -358,7 +352,7 @@ calendarDates.addEventListener("click", (event) => {
 });
 
 
-// ---------- Refresh after saving or deleting ----------
+// Refresh after saving or deleting
 
 function reloadEvents() {
     if (auth.currentUser) {
@@ -370,9 +364,9 @@ window.addEventListener("timeshift:event-saved", reloadEvents);
 window.addEventListener("timeshift:event-deleted", reloadEvents);
 
 
-// ---------- Edit link from the dashboard ----------
+// Edit link from the dashboard
 
-// the dashboard sends people to calendar.html?edit=EVENT_ID
+// The dashboard sends people to calendar.html?edit=EVENT_ID
 function openEditFromLink() {
     const params = new URLSearchParams(window.location.search);
     const eventId = params.get("edit");
@@ -381,13 +375,13 @@ function openEditFromLink() {
         return;
     }
 
-    // take ?edit= off the address so refreshing doesn't reopen it
+    // Take ?edit= off the address so refreshing doesn't reopen it
     window.history.replaceState(null, "", window.location.pathname);
 
     const event = savedEvents.find((item) => item.id === eventId);
 
     if (event) {
-        // go to that event's month
+        // Go to that event's month
         const date = getEventDateParts(event);
         currentMonth = date.month;
         currentYear = date.year;
@@ -400,7 +394,7 @@ function openEditFromLink() {
 }
 
 
-// ---------- Start calendar ----------
+// Start calendar
 
 renderCalendar(currentMonth, currentYear);
 

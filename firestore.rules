@@ -1,176 +1,192 @@
-//sets the Firestore security rules language version
+// Use Firestore rules version 2 for this database.
 rules_version = '2';
 
-//starts the rules for the Cloud Firestore service
 service cloud.firestore {
 
-    //applies these rules to every database and its documents
     match /databases/{database}/documents {
 
-        //checks whether the user is currently logged in
+        // Firebase fills in request.auth after sign-in. Signed-out requests have no user ID.
         function signedIn() {
-
-            //request.auth is null when there is no logged-in user
             return request.auth != null;
         }
 
-        //checks whether the logged-in user owns an event
+        // Check the saved event for reads and deletes.
         function ownsEvent(eventId) {
-
-            //first makes sure that a user is logged in
             return signedIn()
-
-                //gets the event document using the provided event ID
                 && get(/databases/$(database)/documents/events/$(eventId))
-
-                    //compares the event creator's ID with the logged-in user's ID
                     .data.createdBy == request.auth.uid;
         }
 
-        //checks event ownership using the data after a write
+        // When an event and its reminder are saved together, check who owns the event after that write.
         function ownsEventAfterWrite(eventId) {
-
-            //first makes sure that a user is logged in
             return signedIn()
-
-                //gets the event as it will appear after the write finishes
                 && getAfter(/databases/$(database)/documents/events/$(eventId))
-
-                    //checks that the logged-in user created the event
                     .data.createdBy == request.auth.uid;
         }
 
-        //sets the rules for documents inside the users collection
+        // Trust the email from the signed-in account, not an email typed into the app.
+        function verifiedEmail() {
+            return signedIn()
+                && request.auth.token.get('email_verified', false) == true
+                && request.auth.token.get('email', null) is string;
+        }
+
+        // Look up the existing calendar and compare its owner to the signed-in user.
+        function ownsCalendar(calendarId) {
+            return signedIn()
+                && get(/databases/$(database)/documents/calendars/$(calendarId))
+                    .data.ownerId == request.auth.uid;
+        }
+
+        // A share belongs to one calendar and one verified email.
+        function canViewCalendar(calendarId, ownerId) {
+            return verifiedEmail() && calendarId is string
+                && calendarId != 'personal'
+                && get(/databases/$(database)/documents/calendarShares/$(calendarId + ':' + request.auth.token.email.lower()))
+                    .data.ownerId == ownerId;
+        }
+
+        // The shared event must belong to the calendar owner, not just have a matching calendar ID.
+        function canReadSharedEvent(event) {
+            return canViewCalendar(event.get('calendarId', null), event.createdBy)
+                && get(/databases/$(database)/documents/calendars/$(event.calendarId))
+                    .data.ownerId == event.createdBy;
+        }
+
+        // A user can create or move events into their own calendars only.
+        function validEventCalendar(event) {
+            let calendarId = event.get('calendarId', null);
+            return calendarId == null || calendarId == 'personal'
+                || (calendarId is string && ownsCalendar(calendarId));
+        }
+
+        // Only the owner can grant access to this calendar.
+        function validShare(shareId) {
+            let share = request.resource.data;
+            return share.keys().hasOnly(['calendarId', 'ownerId', 'viewerEmail'])
+                && share.calendarId is string
+                && share.calendarId != 'personal'
+                && share.calendarId.matches('[^:/]+')
+                && share.viewerEmail is string
+                && share.viewerEmail.size() <= 254
+                && share.viewerEmail.matches('[^@:/ ]+@[^@:/ ]+[.][^@:/ ]+')
+                && share.viewerEmail == share.viewerEmail.lower()
+                && shareId == share.calendarId + ':' + share.viewerEmail
+                && share.ownerId == request.auth.uid
+                && ownsCalendar(share.calendarId);
+        }
+
+        // A signed-in user can only read or write their own profile.
         match /users/{userId} {
 
-            //allows a logged-in user to create their own user document
             allow create: if signedIn()
-
-                //checks that the document ID matches the logged-in user's ID
                 && request.auth.uid == userId;
 
-            //allows the user to view, change, or delete their own account
             allow read, update, delete: if signedIn()
-
-                //prevents the user from accessing another user's document
                 && request.auth.uid == userId;
         }
 
-        //sets the rules for documents inside the events collection
+        // The creator controls changes to the event. Calendar viewers get read access only.
         match /events/{eventId} {
 
-            //allows a logged-in user to create an event
+            // A new event must name the current user as its creator and use one of their own calendars.
             allow create: if signedIn()
+                && request.resource.data.createdBy == request.auth.uid
+                && validEventCalendar(request.resource.data);
 
-                //requires the new event's createdBy field to match the user
-                && request.resource.data.createdBy == request.auth.uid;
+            // Viewers can read events only from the calendar shared with them.
+            allow read: if (signedIn() && resource.data.createdBy == request.auth.uid)
+                || canReadSharedEvent(resource.data);
 
-            //allows the owner of an event to read it
-            allow read: if signedIn()
-
-                //resource contains the event data already stored in Firestore
-                && resource.data.createdBy == request.auth.uid;
-
-            //allows the owner of an event to update it
+            // Compare the saved and proposed creator IDs so ownership cannot change.
+            // If the event moves, check that its destination is also allowed.
             allow update: if signedIn()
-
-                //checks that the user owns the existing event
                 && resource.data.createdBy == request.auth.uid
+                && request.resource.data.createdBy == request.auth.uid
+                && (request.resource.data.get('calendarId', null) == resource.data.get('calendarId', null)
+                    || validEventCalendar(request.resource.data));
 
-                //prevents the createdBy field from being changed to another user
-                && request.resource.data.createdBy == request.auth.uid;
-
-            //allows the owner of an event to delete it
             allow delete: if signedIn()
-
-                //checks the owner of the event before it is deleted
                 && resource.data.createdBy == request.auth.uid;
         }
 
-        //sets the rules for documents inside the calendars collection
+        // The owner lists and manages their own calendars. Viewers open one calendar they were granted.
         match /calendars/{calendarId} {
 
-            //allows a logged-in user to create a calendar
             allow create: if signedIn()
-
-                //requires the new calendar's ownerId to match the user
                 && request.resource.data.ownerId == request.auth.uid;
 
-            //allows the calendar owner to read or delete the calendar
-            allow read, delete: if signedIn()
-
-                //checks the ownerId stored in the existing calendar
+            allow list, delete: if signedIn()
                 && resource.data.ownerId == request.auth.uid;
 
-            //allows the calendar owner to update the calendar
+            // Viewers can open a specific shared calendar, but cannot list all of its owner’s calendars.
+            allow get: if (signedIn() && resource.data.ownerId == request.auth.uid)
+                || canViewCalendar(calendarId, resource.data.ownerId);
+
+            // Require the same owner before and after the update so edits cannot transfer ownership.
             allow update: if signedIn()
-
-                //checks that the user owns the current calendar
                 && resource.data.ownerId == request.auth.uid
-
-                //prevents the ownerId from being changed to another user
                 && request.resource.data.ownerId == request.auth.uid;
         }
 
-        //sets the rules for documents inside the reminders collection
+        match /calendarShares/{shareId} {
+            // Each viewer can list their own shares, not the other viewers.
+            allow read: if (signedIn() && resource.data.ownerId == request.auth.uid)
+                || (verifiedEmail() && resource.data.viewerEmail == request.auth.token.email.lower());
+
+            // The calendar owner grants access. An update can only resave the same grant.
+            allow create: if signedIn() && validShare(shareId);
+            allow update: if signedIn() && validShare(shareId)
+                && request.resource.data == resource.data;
+            // Revoking access deletes the grant. Later reads must pass the share check again.
+            allow delete: if signedIn() && resource.data.ownerId == request.auth.uid;
+        }
+
+        // Reminders are private to the user who set them, even when the event is shared.
         match /reminders/{reminderId} {
 
-            //allows a logged-in user to create a reminder
+            // A reminder must be for your own account and attached to an event you own.
             allow create: if signedIn()
-
-                //requires the reminder's userId to match the user
                 && request.resource.data.userId == request.auth.uid
-
-                //requires the user to own the event connected to the reminder
                 && ownsEventAfterWrite(request.resource.data.eventId);
 
-            //allows a user to read or delete their own reminders
             allow read, delete: if signedIn()
-
-                //checks the userId stored in the existing reminder
                 && resource.data.userId == request.auth.uid;
 
-            //allows a user to update their own reminder
+            // Dismissing a reminder can change its status, but not its user or linked event.
             allow update: if signedIn()
-
-                //checks that the user owns the current reminder
                 && resource.data.userId == request.auth.uid
-
-                //prevents the reminder from being assigned to another user
                 && request.resource.data.userId == request.auth.uid
-
-                //prevents the reminder's connected event from being changed
                 && request.resource.data.eventId == resource.data.eventId;
         }
 
-        //sets the rules for documents inside the repetitions collection
+        // A repeat record stores the schedule for one event. The event owner manages it.
         match /repetitions/{repetitionId} {
 
-            //allows a repetition to be created for an event the user owns
+            // The event and its repeat record can be created in the same save, so check the event after the write.
             allow create: if ownsEventAfterWrite(
-
-                //gets the event ID from the new repetition document
                 request.resource.data.eventId
             );
 
-            //allows access when the user owns the connected event
+            // Viewers only get the repeat settings for the event they can read.
+            allow get: if canReadSharedEvent(
+                    get(/databases/$(database)/documents/events/$(resource.data.eventId)).data
+                ) && get(/databases/$(database)/documents/events/$(resource.data.eventId))
+                    .data.get('repetitionId', null) == repetitionId;
+
             allow read, delete: if ownsEvent(
 
-                //gets the event ID from the existing repetition document
                 resource.data.eventId
             );
 
-            //allows the event owner to update a repetition
+            // Repeat settings can change, but the repeat record must stay linked to the same event.
             allow update: if ownsEvent(resource.data.eventId)
-
-                //prevents the repetition's connected event from being changed
                 && request.resource.data.eventId == resource.data.eventId;
         }
 
-        //matches any document that was not covered by the rules above
+        // Deny anything the rules do not explicitly allow.
         match /{document=**} {
 
-            //blocks all other read and write requests
             allow read, write: if false;
         }
     }

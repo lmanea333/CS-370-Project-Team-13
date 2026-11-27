@@ -11,33 +11,36 @@ import {
 
 import { db } from "./config.js";
 
-const repetitionsCollection = collection(db, "repetitions");   //reference to the repetitions collection
+const repetitionsCollection = collection(db, "repetitions");
 
-export async function getEventRepetitions(eventId) {  //gets the repetitions for an event
+// Firestore stores the settings for a repeating series separately from the event itself.
+export async function getEventRepetitions(eventId) {
+    // Find the repeat settings by the saved event ID, not by a date shown on the calendar.
     const repetitionsQuery = query(
         repetitionsCollection,
         where("eventId", "==", eventId)
-    );     //only looks for repetitions connected to this event
+    );
 
-    const results = await getDocs(repetitionsQuery);  //runs the search
+    const results = await getDocs(repetitionsQuery);
 
-    return results.docs.map((repetition) => ({    //turns each result into a regular object
-        id: repetition.id,  //adds the repetition document id
-        ...repetition.data()     //adds the rest of the repetition information
+    return results.docs.map((repetition) => ({
+        id: repetition.id,
+        ...repetition.data()
     }));
 }
 
-export function updateRepetition(repetitionId, changes) {   //updates an existing repetition
-    const repetitionRef = doc(db, "repetitions", repetitionId);     //finds the repetition by its id
+// Change the schedule fields on the existing repeat record.
+export function updateRepetition(repetitionId, changes) {
+    const repetitionRef = doc(db, "repetitions", repetitionId);
 
     return updateDoc(repetitionRef, {
-        ...changes,  //adds the new repetition information
-        updatedAt: serverTimestamp()     //records when the repetition was changed
+        ...changes,
+        updatedAt: serverTimestamp()
     });
 }
 
-export function removeRepetition(repetitionId) {  //deletes an existing repetition
-    const repetitionRef = doc(db, "repetitions", repetitionId);   //finds the repetition by its id
+export function removeRepetition(repetitionId) {
+    const repetitionRef = doc(db, "repetitions", repetitionId);
 
-    return deleteDoc(repetitionRef);     //removes the repetition from Firestore
+    return deleteDoc(repetitionRef);
 }

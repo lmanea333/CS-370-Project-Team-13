@@ -82,11 +82,41 @@
             <div>Sat</div>
         </div>
 
-        <!-- calendar.js fills in the dates -->
+        <!-- The Calendar script draws the dates and events here. -->
         <div class="calendar-dates"></div>
 
     </div>
 </div>
+
+<section class="container shared-calendar-panel" aria-labelledby="sharing-title">
+    <h2 id="sharing-title">Shared calendars</h2>
+    <details>
+        <summary>Share one of my calendars</summary>
+        <form id="share-calendar-form">
+            <div class="form-field">
+                <label for="share-owned-calendar">Calendar</label>
+                <select id="share-owned-calendar" required></select>
+            </div>
+            <div class="form-field">
+                <label for="share-viewer-email">Viewer’s Google email</label>
+                <input id="share-viewer-email" type="email" maxlength="254" required>
+            </div>
+            <button class="btn" type="submit">Give read-only access</button>
+        </form>
+        <p>They’ll see the calendar when they sign in to TimeShift. This doesn’t send an email.</p>
+        <p id="share-owner-status" role="status"></p>
+        <ul id="share-viewer-list" aria-label="People with access"></ul>
+    </details>
+
+    <div class="form-field">
+        <label for="shared-with-me">Shared with me</label>
+        <select id="shared-with-me" disabled>
+            <option value="">No shared calendars</option>
+        </select>
+    </div>
+    <p id="shared-calendar-status" role="status"></p>
+    <ul id="shared-calendar-events" aria-label="Shared calendar events"></ul>
+</section>
 
     <!-- Create Calendar popup -->
 <dialog id="calendar-dialog">
@@ -95,7 +125,6 @@
         <div class="dialog-title">
             <h2>New Calendar</h2>
 
-            <!-- Closes the popup -->
             <button
                 id="close-calendar-form"
                 type="button"
@@ -107,7 +136,6 @@
 
         <div class="form-inside">
 
-            <!-- Calendar name -->
             <div class="form-field">
                 <label for="calendar-name">Calendar name *</label>
 
@@ -121,7 +149,6 @@
                 >
             </div>
 
-            <!-- Optional calendar description -->
             <div class="form-field">
                 <label for="calendar-description">Description</label>
 
@@ -145,7 +172,6 @@
                 >
             </div>
 
-            <!-- Error or success message -->
             <p id="calendar-form-status"></p>
 
             <div class="form-buttons">
@@ -183,13 +209,11 @@
 
             <div class="form-inside">
 
-                <!-- Event title -->
                 <div class="form-field">
                     <label for="event-title">Title *</label>
                     <input id="event-title" name="title" type="text" required>
                 </div>
 
-                <!-- Calendar selection -->
                 <div class="form-field">
                     <label for="event-calendar">Calendar *</label>
 
@@ -211,11 +235,7 @@
                     </div>
                 </div>
 
-                <!--
-                    Ending date and time.
-                    A separate end date allows events to continue
-                    past midnight or span multiple days.
-                -->
+                <!-- A separate end date lets events run past midnight or span multiple days. -->
                 <div class="form-row">
                     <div class="form-field">
                         <label for="event-end-date">End date</label>
@@ -237,7 +257,6 @@
                     </select>
                 </div>
 
-                <!-- Event location -->
                 <div class="form-field">
                     <label for="event-location">Location</label>
                     <input id="event-location" name="location" type="text">
@@ -255,7 +274,6 @@
                     >
                 </div>
 
-                <!-- Optional description -->
                 <div class="form-field">
                     <label for="event-description">Description</label>
 
@@ -333,10 +351,8 @@
                     >
                 </div>
 
-                <!-- Error or success message -->
                 <p id="event-form-status"></p>
 
-                <!-- Form buttons -->
                 <div class="form-buttons">
                     <button
                         id="delete-event"
@@ -363,5 +379,7 @@
     <script type="module" src="../js/pages/calendar.js"></script>
     <script type="module" src="../js/pages/event-form.js"></script>
     <script type="module" src="../js/pages/calendar-manager.js"></script>
+    <script type="module" src="../js/pages/shared-calendar.js"></script>
+    <script type="module" src="../js/reminder-bell.js"></script>
 </body>
 </html>

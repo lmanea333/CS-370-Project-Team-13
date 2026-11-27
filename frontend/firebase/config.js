@@ -9,7 +9,7 @@ const firebaseConfig = {
   storageBucket: "timeshift-team13.firebasestorage.app",
   messagingSenderId: "434103323473",
   appId: "1:434103323473:web:34f9d8a03d48324e236170"
-}; // Paste the fields Firebase provided here.
+};
 
 
 const app = initializeApp(firebaseConfig);

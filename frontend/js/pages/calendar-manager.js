@@ -9,7 +9,7 @@ import {
 import Calendar from "../../models/Calendar.js";
 
 
-// ---------- Page elements ----------
+// Page elements
 
 const openButton =
     document.getElementById("open-calendar-form");
@@ -41,7 +41,7 @@ const calendarColorInput =
 let userCalendars = [];
 
 
-// ---------- Open and close the popup ----------
+// Open and close the popup
 
 function openCalendarForm() {
     statusMessage.textContent = "";
@@ -60,7 +60,7 @@ function cancelCalendarForm() {
 }
 
 
-// ---------- Add calendars to both dropdowns ----------
+// Add calendars to both dropdowns
 
 function populateCalendarDropdowns() {
     const selectedFilter = calendarFilter.value;
@@ -125,7 +125,7 @@ function populateCalendarDropdowns() {
 }
 
 
-// ---------- Load calendars from Firestore ----------
+// Load calendars from Firestore
 
 async function loadCalendars(userId) {
     try {
@@ -151,7 +151,7 @@ async function loadCalendars(userId) {
 }
 
 
-// ---------- Create a calendar ----------
+// Create a calendar
 
 async function submitCalendarForm(event) {
     event.preventDefault();
@@ -234,7 +234,7 @@ async function submitCalendarForm(event) {
 }
 
 
-// ---------- Event listeners ----------
+// Event listeners
 
 openButton.addEventListener(
     "click",
@@ -264,7 +264,7 @@ calendarDialog.addEventListener("click", (event) => {
 });
 
 
-// ---------- Start calendar manager ----------
+// Start calendar manager
 
 onAuthStateChanged(auth, (user) => {
     if (user) {

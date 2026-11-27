@@ -1,6 +1,4 @@
-// Import getTimeZones from the installed timezone library.
-// This library gives us a list of worldwide timezones.
-import { getTimeZones } from "@vvo/tzdb";
+import { getTimeZoneOptions } from "../time-zone-options.js";
 
 // Converts a selected timezone time into UTC
 import { fromZonedTime, formatInTimeZone } from "date-fns-tz";
@@ -20,9 +18,7 @@ import { deleteEventWithConfirm } from "../event-details.js";
 import Event from "../../models/Event.js";
 
 
-// --------------------------------------------------
-// 1. Connect JavaScript to the HTML elements
-// --------------------------------------------------
+// Connect JavaScript to the HTML elements
 
 // Button that opens the New Event popup
 const openButton =
@@ -80,7 +76,7 @@ const saveButton =
 const deleteButton =
     document.getElementById("delete-event");
 
-// null = making a new event, otherwise the event being edited
+// Null = making a new event, otherwise the event being edited
 let editingEvent = null;
 
 // Repeat dropdown + the "How many times?" box under it
@@ -94,9 +90,7 @@ const repeatCountInput =
     document.getElementById("event-repeat-count");
 
 
-// --------------------------------------------------
-// 2. Create today's date in the format HTML needs
-// --------------------------------------------------
+// Date inputs use YYYY-MM-DD. Use the local calendar date, not a UTC date that might be a day off.
 
 function getToday() {
     // Create a JavaScript Date containing the current date
@@ -145,52 +139,18 @@ function syncEndDateWithStart() {
 }
 
 
-// --------------------------------------------------
-// 3. Add worldwide timezones to the dropdown
-// --------------------------------------------------
+// Add worldwide timezones to the dropdown
 
 function addTimeZonesToDropdown() {
-    // Ask the timezone library for every timezone.
-    // includeUtc also adds UTC to the list.
-    const timeZones = getTimeZones({
-        includeUtc: true
-    });
-
-    // Go through every timezone returned by the library
-    for (const timeZone of timeZones) {
-        // Create a new HTML <option>
-        const option = document.createElement("option");
-
-        // This is the value saved when the option is selected.
-        // An example is America/Los_Angeles.
-        option.value = timeZone.name;
-
-        // Start the visible label with the current
-        // timezone format and offset.
-        let optionText = timeZone.currentTimeFormat;
-
-        // Add the country name when one is available.
-        if (timeZone.countryName) {
-            optionText =
-                optionText + " — " + timeZone.countryName;
-        }
-
-        // Set the text the user sees in the dropdown.
-        option.textContent = optionText;
-
-        // Add this option to the timezone dropdown.
-        timeZoneSelect.appendChild(option);
+    for (const { value, label } of getTimeZoneOptions()) {
+        timeZoneSelect.add(new Option(label, value));
     }
 
-    // After adding all the options, automatically select
-    // the user's saved or computer timezone.
     selectUserTimeZone();
 }
 
 
-// --------------------------------------------------
-// 4. Select the user's timezone
-// --------------------------------------------------
+// Select the user's timezone
 
 function selectUserTimeZone() {
     // First, look for a timezone previously saved
@@ -219,9 +179,7 @@ function selectUserTimeZone() {
 }
 
 
-// --------------------------------------------------
-// 5. Clear the form message
-// --------------------------------------------------
+// Clear the form message
 
 function clearStatusMessage() {
     // Replace the existing error or success message
@@ -230,9 +188,7 @@ function clearStatusMessage() {
 }
 
 
-// --------------------------------------------------
-// 6. Open the event popup
-// --------------------------------------------------
+// Open the event popup
 
 function openEventForm() {
     // Remove an old error or success message.
@@ -253,18 +209,16 @@ function openEventForm() {
     if (!dateInput.value) {
         dateInput.value = getToday();
     }
-    // Start new events with the same starting and ending date.
+    // A new event starts with the same end date unless the user picks a later date.
 syncEndDateWithStart();
 
-    // showModal displays the dialog as a popup and
+    // ShowModal displays the dialog as a popup and
     // darkens the page behind it.
     eventDialog.showModal();
 }
 
 
-// --------------------------------------------------
-// 7. Close the event popup
-// --------------------------------------------------
+// Close the event popup
 
 function closeEventForm() {
     // Close the dialog without changing its fields.
@@ -272,9 +226,7 @@ function closeEventForm() {
 }
 
 
-// --------------------------------------------------
-// 8. Cancel and reset the form
-// --------------------------------------------------
+// Cancel and reset the form
 
 function cancelEventForm() {
     // Clear every input in the form.
@@ -298,9 +250,7 @@ function cancelEventForm() {
 }
 
 
-// --------------------------------------------------
-// 9. Validate the start and end times
-// --------------------------------------------------
+// Check the start and end as real instants in the event's time zone, not as text in the form.
 
 
 // Check that the complete ending date and time
@@ -348,12 +298,7 @@ function eventTimesAreValid() {
 }
 
 
-// --------------------------------------------------
-// 10. Collect the information entered in the form
-// --------------------------------------------------
-
-// Create an Event model from the form information
-// Create an Event model from the information entered in the form.
+// Put the form values into an Event before sending them to Firestore.
 function createEventDraft() {
     const formData = new FormData(eventForm);
 
@@ -406,15 +351,14 @@ function createEventDraft() {
     });
 }
 
-// --------------------------------------------------
-// 11. Handle the Save Event button
-// --------------------------------------------------
+// Handle the Save Event button
 
 // Validate and save the event to Firestore
 async function submitEventForm(event) {
     event.preventDefault();
     clearStatusMessage();
 
+    // Let the browser report missing fields before checking the event’s actual start and end times.
     if (!eventForm.reportValidity()) {
         return;
     }
@@ -437,17 +381,18 @@ async function submitEventForm(event) {
         const eventModel = createEventDraft();
         const formData = new FormData(eventForm);
         const repetition = formData.get("repetition");
+        // No reminder is stored as null. Other choices give the number of minutes before the start.
         const reminderValue = formData.get("reminderMinutes");
         const reminderMinutes = reminderValue === "none"
             ? null
             : Number(reminderValue);
 
-        // how many times it repeats (null if it doesn't repeat)
+        // How many times it repeats (null if it doesn't repeat)
         const repeatCount = repetition === "none"
             ? null
             : Number(formData.get("repeatCount"));
         
-        // editing an event that already exists
+        // Editing an event that already exists
         if (editingEvent) {
             await saveEditedEvent(eventModel, repetition, reminderMinutes, repeatCount);            
             return;
@@ -494,9 +439,7 @@ async function submitEventForm(event) {
     }
 }
 
-// --------------------------------------------------
 // Edit mode
-// --------------------------------------------------
 
 // Puts the popup back to "New Event"
 function setNewMode() {
@@ -527,6 +470,7 @@ function toDate(value) {
 }
 
 // Opens the popup with an event's info already filled in
+// Fill the form from the original saved event, not from a date generated for a repeat.
 async function openEditForm(event) {
     clearStatusMessage();
     eventForm.reset();
@@ -537,10 +481,11 @@ async function openEditForm(event) {
     deleteButton.hidden = false;
     showOrHideRepeatCount();
 
+    // Convert the saved timestamps back to dates before restoring the form’s local date and time fields.
     const start = toDate(event.startAt);
     const end = toDate(event.endAt);
 
-    // show the times in the time zone it was made in
+    // Show the date and time as entered in the event’s own time zone, not the viewer’s.
     const zone = event.timeZone || "UTC";
 
     document.getElementById("event-title").value = event.title || "";
@@ -550,8 +495,8 @@ dateInput.value =
     formatInTimeZone(start, zone, "yyyy-MM-dd");
 startTimeInput.value =
     formatInTimeZone(start, zone, "HH:mm");
-// Restore the event's ending date and time.
-// Events without an ending time use the starting date.
+// Restore the end date separately so an overnight event still ends on the correct day.
+// If the event has no ending time, leave that field blank and default the date to the start date.
 endDateInput.value = end
     ? formatInTimeZone(end, zone, "yyyy-MM-dd")
     : dateInput.value;
@@ -570,7 +515,7 @@ endDateInput.min = dateInput.value;
 
     eventDialog.showModal();
 
-       // repeat + reminder are saved separately so load them
+    // The form is already open. Use the original event ID to load its repeat settings and reminder.
     try {
         if (event.repetitionId) {
             const repetitions = await getEventRepetitions(event.id);
@@ -579,7 +524,7 @@ endDateInput.min = dateInput.value;
                 document.getElementById("event-repeat").value =
                     repetitions[0].frequency;
 
-                // old events might not have a count saved
+                // Old events might not have a count saved
                 if (repetitions[0].occurrenceCount) {
                     repeatCountInput.value = repetitions[0].occurrenceCount;
                 }
@@ -614,6 +559,7 @@ async function saveEditedEvent(eventModel, repetition, reminderMinutes, repeatCo
         color: eventModel.color
     };
 
+    // One saved event drives every date in a series, so saving here updates the whole series.
     await editEvent(editingEvent.id, changes, {
         repetition: repetition,
         reminderMinutes: reminderMinutes,
@@ -624,7 +570,7 @@ async function saveEditedEvent(eventModel, repetition, reminderMinutes, repeatCo
 
     statusMessage.textContent = "Changes saved!";
 
-    // tells the calendar to reload
+    // Tells the calendar to reload
     window.dispatchEvent(new CustomEvent("timeshift:event-saved"));
 
     setTimeout(() => {
@@ -650,13 +596,10 @@ async function deleteFromForm() {
     }
 }
 
-// --------------------------------------------------
-// 12. Close when the dark background is clicked
-// --------------------------------------------------
+// Close when the dark background is clicked
 
 function closeWhenBackgroundIsClicked(event) {
-    // event.target tells us exactly what was clicked.
-    //
+    // Event.target tells us exactly what was clicked.
     // If the dialog itself was clicked, rather than
     // something inside the form, the dark background
     // area was clicked.
@@ -666,9 +609,7 @@ function closeWhenBackgroundIsClicked(event) {
 }
 
 
-// --------------------------------------------------
-// 13. Start the event form
-// --------------------------------------------------
+// Start the event form
 
 // Add the worldwide timezones when the page loads.
 addTimeZonesToDropdown();

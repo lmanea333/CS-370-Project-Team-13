@@ -1,14 +1,11 @@
-// Import the Google authentication functions
 import { logOut, watchAuthState } from "../../firebase/auth.js";
 import { getUserEvents } from "../../firebase/events.js";
 import { auth } from "../../firebase/config.js";
 import { getUserProfile } from "../../firebase/users.js";
 import { openEventDetails } from "../event-details.js";
+import { addRepeatInfo } from "../repeats.js";
+import { getDashboardEvents } from "../dashboard-events.js";
 
-
-// --------------------------------------------------
-// 1. Get elements from dashboard.html
-// --------------------------------------------------
 
 const greeting = document.getElementById("user-greeting");
 const timeZoneDisplay = document.getElementById("current-timezone");
@@ -25,16 +22,7 @@ const signOutButton =
     document.getElementById("sign-out-button");
 
 
-// --------------------------------------------------
-// 2. Load the user's saved theme
-// --------------------------------------------------
-
-
-
-
-// --------------------------------------------------
-// 3. Load the user's saved timezone
-// --------------------------------------------------
+// Load the user's saved timezone
 
 let userTimeZone =
     localStorage.getItem("timeshift-timezone");
@@ -47,20 +35,15 @@ if (!userTimeZone) {
 timeZoneDisplay.textContent = userTimeZone;
 
 
-// --------------------------------------------------
-// 4. Event list
-//
+// Event list
 // This is empty until events are loaded from Firestore.
-// --------------------------------------------------
 
 let events = [];
 
 
+// Format event dates and times
 
-// --------------------------------------------------
-// 5. Format event dates and times
-// --------------------------------------------------
-
+// Group and compare dates in the selected time zone so events near midnight land under the right day.
 function getDateKey(date) {
     const parts = new Intl.DateTimeFormat("en-CA", {
         timeZone: userTimeZone,
@@ -116,53 +99,14 @@ function formatTime(date) {
 }
 
 
-// --------------------------------------------------
-// 6. Filter the events
-// --------------------------------------------------
+// Filter the events
 
 function getFilteredEvents() {
-    const selectedFilter = eventFilter.value;
-    const now = new Date();
-
-    const endOfWeek = new Date();
-    endOfWeek.setDate(now.getDate() + 7);
-
-    const filteredEvents = [];
-
-    for (const event of events) {
-        let includeEvent = false;
-
-        if (selectedFilter === "today") {
-            includeEvent =
-                getDateKey(event.startAt) === getDateKey(now);
-        } else if (selectedFilter === "week") {
-            includeEvent =
-                event.startAt >= now &&
-                event.startAt <= endOfWeek;
-        } else if (selectedFilter === "all") {
-            includeEvent = event.startAt >= now;
-        }else {
-            // The default filter shows upcoming events
-            includeEvent = event.startAt >= now;
-        }
-
-        if (includeEvent) {
-            filteredEvents.push(event);
-        }
-    }
-
-    // Put the earliest events first
-    filteredEvents.sort(function (firstEvent, secondEvent) {
-        return firstEvent.startAt - secondEvent.startAt;
-    });
-
-    return filteredEvents;
+    return getDashboardEvents(events, eventFilter.value, new Date(), userTimeZone);
 }
 
 
-// --------------------------------------------------
-// 7. Create one event card
-// --------------------------------------------------
+// Create one event card
 
 function createEventCard(event) {
     const eventCard = document.createElement("button");
@@ -222,7 +166,7 @@ date.textContent = new Intl.DateTimeFormat("en-US", {
     eventCard.appendChild(details);
     eventCard.appendChild(arrow);
 
-        // show the event details popup
+        // Show the event details popup
     eventCard.addEventListener("click", function () {
         openEventDetails(event);
     });
@@ -231,9 +175,7 @@ date.textContent = new Intl.DateTimeFormat("en-US", {
 }
 
 
-// --------------------------------------------------
-// 8. Display all events on the dashboard
-// --------------------------------------------------
+// Display all events on the dashboard
 
 function displayEvents() {
     // Remove anything currently displayed
@@ -288,9 +230,14 @@ function displayEvents() {
     }
 }
 
+// Load the user’s own saved events, then turn repeating series into the dates the Dashboard can show.
 async function loadDashboardEvents(userId) {
     try {
         const savedEvents = await getUserEvents(userId);
+        // Load the repeat settings before building the list of upcoming dates.
+        await addRepeatInfo(savedEvents);
+        emptyEvents.querySelector("p").textContent =
+            "You don't have any events for this filter. Click \"+ New Event\" to add one.";
 
         events = savedEvents.map((event) => ({
             ...event,
@@ -310,18 +257,13 @@ async function loadDashboardEvents(userId) {
         events = [];
         displayEvents();
 
-        const heading = emptyEvents.querySelector("h3");
-        const message = emptyEvents.querySelector("p");
-
-        heading.textContent = "Events could not be loaded";
-        message.textContent = "Please refresh the page and try again.";
+        emptyEvents.querySelector("p").textContent =
+            "Events could not be loaded. Please refresh the page and try again.";
     }
 }
 
 
-// --------------------------------------------------
-// 9. Display the signed-in user's name
-// --------------------------------------------------
+// Display the signed-in user's name
 
 async function displayUser(user) {
     // Return to login if nobody is signed in
@@ -341,6 +283,7 @@ async function displayUser(user) {
     }
 
     try {
+        // Use the account’s saved time zone if it differs from the browser’s saved choice.
         const profile = await getUserProfile(user.uid);
 
         if (profile?.timeZone) {
@@ -359,18 +302,14 @@ async function displayUser(user) {
 }
 
 
-// --------------------------------------------------
-// 10. New Event button
-// --------------------------------------------------
+// New Event button
 
 function openNewEventForm() {
     window.location.href = "./calendar.html";
 }
 
 
-// --------------------------------------------------
-// 11. Sign the user out
-// --------------------------------------------------
+// Sign the user out
 
 async function signOutUser() {
     await logOut();
@@ -378,14 +317,12 @@ async function signOutUser() {
 }
 
 
-// --------------------------------------------------
-// 12. Start the dashboard
-// --------------------------------------------------
+// Start the dashboard
 
 watchAuthState(displayUser);
 
 
-// reload the list after an event is deleted from the popup
+// Reload the list after an event is deleted from the popup
 window.addEventListener("timeshift:event-deleted", () => {
     if (auth.currentUser) {
         loadDashboardEvents(auth.currentUser.uid);

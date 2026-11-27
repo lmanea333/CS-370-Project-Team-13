@@ -27,8 +27,7 @@ function applyTheme(theme) {
     if (theme === "light" || theme === "dark") {
         document.documentElement.dataset.theme = theme;
     } else {
-        // No data-theme means theme.css follows
-        // the computer's light/dark setting
+        // Without an explicit theme, the stylesheet follows the device setting.
         document.documentElement.removeAttribute(
             "data-theme"
         );

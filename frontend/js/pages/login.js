@@ -1,18 +1,12 @@
-// Import Google Sign-In functions
 import {
     signInWithGoogle,
     watchAuthState
 } from "../../firebase/auth.js";
 
-// Import the function that saves the user to Firestore
 import {
     saveUserProfile
 } from "../../firebase/users.js";
 
-
-// --------------------------------------------------
-// 1. Get elements from the login HTML
-// --------------------------------------------------
 
 const signInButton =
     document.getElementById("google-sign-in");
@@ -21,9 +15,7 @@ const statusMessage =
     document.getElementById("status");
 
 
-// --------------------------------------------------
-// 2. Open Google Sign-In
-// --------------------------------------------------
+// Open Google Sign-In
 
 async function handleGoogleSignIn() {
     statusMessage.textContent =
@@ -44,12 +36,9 @@ async function handleGoogleSignIn() {
 }
 
 
-// --------------------------------------------------
-// 3. Respond when the login status changes
-// --------------------------------------------------
+// Respond when the login status changes
 
 async function handleAuthChange(user) {
-    // No user means nobody is signed in
     if (!user) {
         statusMessage.textContent =
             "Please sign in to continue.";
@@ -92,9 +81,7 @@ async function handleAuthChange(user) {
 }
 
 
-// --------------------------------------------------
-// 4. Start the login page
-// --------------------------------------------------
+// Start the login page
 
 // Open Google Sign-In when the button is clicked
 signInButton.addEventListener(

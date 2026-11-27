@@ -11,33 +11,36 @@ import {
 
 import { db } from "./config.js";
 
-const remindersCollection = collection(db, "reminders");   //reference to the reminders collection
+const remindersCollection = collection(db, "reminders");
 
-export async function getUserReminders(userId) {  //gets all reminders for one user
+// Only load reminders for this account so edits never touch another user's reminders.
+export async function getUserReminders(userId) {
     const remindersQuery = query(
         remindersCollection,
         where("userId", "==", userId)
-    );    //only looks for reminders that belong to this user
+    );
 
-    const results = await getDocs(remindersQuery);  //runs the search
+    const results = await getDocs(remindersQuery);
 
-    return results.docs.map((reminder) => ({   //turns each result into a regular object
-        id: reminder.id,     //adds the reminder document id
-        ...reminder.data()  //adds the rest of the reminder information
+    return results.docs.map((reminder) => ({
+        id: reminder.id,
+        ...reminder.data()
     }));
 }
 
-export function updateReminder(reminderId, changes) {    //updates an existing reminder
-    const reminderRef = doc(db, "reminders", reminderId);  //finds the reminder using its id
+// The reminder bell uses this to save a dismissal so the alert stays gone after reloading.
+export function updateReminder(reminderId, changes) {
+    const reminderRef = doc(db, "reminders", reminderId);
 
     return updateDoc(reminderRef, {
-        ...changes,     //adds the new reminder information
-        updatedAt: serverTimestamp()  //records when the reminder was changed
+        ...changes,
+        updatedAt: serverTimestamp()
     });
 }
 
-export function removeReminder(reminderId) {  //deletes an existing reminder
-    const reminderRef = doc(db, "reminders", reminderId);     //finds the reminder using its id
+// Delete the reminder document rather than updating its status.
+export function removeReminder(reminderId) {
+    const reminderRef = doc(db, "reminders", reminderId);
 
-    return deleteDoc(reminderRef);   //removes the reminder from Firestore
+    return deleteDoc(reminderRef);
 }

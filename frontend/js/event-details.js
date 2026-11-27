@@ -9,12 +9,12 @@ import { getUserCalendars } from "../firebase/calendars.js";
 import { deleteEventAndExtras } from "../firebase/events.js";
 
 
-// ---------- make the popup (only once per page) ----------
+// Make the popup (only once per page)
 
 const detailsDialog = document.createElement("dialog");
 detailsDialog.id = "details-dialog";
 
-// the parts that change get filled in with textContent below
+// The parts that change get filled in with textContent below
 detailsDialog.innerHTML = `
     <div class="dialog-title">
         <h2 id="details-title"></h2>
@@ -57,13 +57,13 @@ detailsDialog.innerHTML = `
 
 document.body.appendChild(detailsDialog);
 
-// shortcut so we don't have to type document.getElementById a million times
+// Shortcut so we don't have to type document.getElementById a million times
 function $(id) {
     return document.getElementById(id);
 }
 
 
-// ---------- time zone + formatting helpers ----------
+// Time zone + formatting helpers
 
 function getUserTimeZone() {
     return (
@@ -72,7 +72,7 @@ function getUserTimeZone() {
     );
 }
 
-// firebase gives back a Timestamp, so turn it into a normal Date
+// Firebase gives back a Timestamp, so turn it into a normal Date
 function toDate(value) {
     if (!value) {
         return null;
@@ -83,7 +83,7 @@ function toDate(value) {
     return new Date(value);
 }
 
-// ex: "Tuesday, November 17, 2026"
+// Ex: "Tuesday, November 17, 2026"
 function formatDate(date, timeZone) {
     return date.toLocaleDateString("en-US", {
         timeZone: timeZone,
@@ -94,7 +94,7 @@ function formatDate(date, timeZone) {
     });
 }
 
-// ex: "3:00 PM"
+// Ex: "3:00 PM"
 function formatTime(date, timeZone) {
     return date.toLocaleTimeString("en-US", {
         timeZone: timeZone,
@@ -103,7 +103,7 @@ function formatTime(date, timeZone) {
     });
 }
 
-// ex: "PST" or "GMT+9"
+// Ex: "PST" or "GMT+9"
 function getShortZoneName(date, timeZone) {
     const parts = new Intl.DateTimeFormat("en-US", {
         timeZone: timeZone,
@@ -114,7 +114,7 @@ function getShortZoneName(date, timeZone) {
     return zonePart ? zonePart.value : "";
 }
 
-// ex: "3:00 PM - 4:30 PM PST"
+// Ex: "3:00 PM - 4:30 PM PST"
 function formatTimeRange(start, end, timeZone) {
     let text = formatTime(start, timeZone);
 
@@ -125,12 +125,12 @@ function formatTimeRange(start, end, timeZone) {
     return text + " " + getShortZoneName(start, timeZone);
 }
 
-// ex: "Asia/Tokyo" -> "Asia / Tokyo"
+// Ex: "Asia/Tokyo" -> "Asia / Tokyo"
 function prettyZoneName(timeZone) {
     return timeZone.replaceAll("_", " ").replaceAll("/", " / ");
 }
 
-// if the end time is on a different day (ex: crosses midnight)
+// If the end time is on a different day (ex: crosses midnight)
 // show both dates
 function formatDateRange(start, end, timeZone) {
     const startDate = formatDate(start, timeZone);
@@ -148,7 +148,7 @@ function formatDateRange(start, end, timeZone) {
 }
 
 
-// ---------- labels for the dropdown values ----------
+// Labels for the dropdown values
 
 const repeatLabels = {
     daily: "Every day",
@@ -178,9 +178,9 @@ function capitalize(word) {
 }
 
 
-// ---------- show or hide a row ----------
+// Show or hide a row
 
-// only show optional rows if the user actually filled them in
+// Only show optional rows if the user actually filled them in
 function setRow(rowId, cellId, value) {
     if (value) {
         $(cellId).textContent = value;
@@ -191,7 +191,7 @@ function setRow(rowId, cellId, value) {
 }
 
 
-// ---------- these need extra firebase lookups ----------
+// The repeat and reminder settings live separately from the event, so the popup loads them as needed.
 
 async function showCalendarName(calendarId) {
     if (!calendarId || calendarId === "personal") {
@@ -228,7 +228,7 @@ async function showRepeat(event) {
 
         let text = repeatLabels[frequency] || "Repeats";
 
-        // ex: "Every week, 10 times"
+        // Ex: "Every week, 10 times"
         if (timesCount) {
             text = text + ", " + timesCount + " times";
         }
@@ -256,9 +256,9 @@ async function showReminder(event) {
 }
 
 
-// ---------- open the popup for one event ----------
+// Open the popup for one event
 
-// the event that is open right now (Edit and Delete use it)
+// The event that is open right now (Edit and Delete use it)
 let currentEvent = null;
 
 export function openEventDetails(event) {
@@ -269,16 +269,16 @@ export function openEventDetails(event) {
     const yourZone = getUserTimeZone();
     const originalZone = event.timeZone || "UTC";
 
-    // title + the event color on the side
+    // Title + the event color on the side
     $("details-title").textContent = event.title || "(no title)";
     detailsDialog.style.borderLeft = "8px solid " + (event.color || "#5f8a3a");
 
-    // your time
+    // Your time
     $("details-your-date").textContent = formatDateRange(start, end, yourZone);
     $("details-your-time").textContent = formatTimeRange(start, end, yourZone);
     $("details-your-zone").textContent = prettyZoneName(yourZone);
 
-    // original time (what the person picked in the form)
+    // Original time (what the person picked in the form)
     $("details-original-date").textContent = formatDateRange(start, end, originalZone);
     $("details-original-time").textContent = formatTimeRange(start, end, originalZone);
 
@@ -289,13 +289,13 @@ export function openEventDetails(event) {
         $("details-original-zone").textContent = prettyZoneName(originalZone);
     }
 
-    // the rest of the form
+    // The rest of the form
     setRow("row-location", "details-location", event.location);
     setRow("row-category", "details-category",
         event.category ? capitalize(event.category) : "");
     setRow("row-description", "details-description", event.description);
 
-    // meeting link is a real link (only if it starts with http)
+    // Meeting link is a real link (only if it starts with http)
     const link = event.meetingLink || "";
     if (link.startsWith("http://") || link.startsWith("https://")) {
         const linkTag = document.createElement("a");
@@ -311,14 +311,14 @@ export function openEventDetails(event) {
 
     detailsDialog.showModal();
 
-    // these load from firebase after the popup is open
+    // These load from firebase after the popup is open
     showCalendarName(event.calendarId);
     showRepeat(event);
     showReminder(event);
 }
 
 
-// ---------- closing ----------
+// Closing
 
 function closeEventDetails() {
     detailsDialog.close();
@@ -327,7 +327,7 @@ function closeEventDetails() {
 $("close-details").addEventListener("click", closeEventDetails);
 $("details-ok").addEventListener("click", closeEventDetails);
 
-// clicking the dark background closes it too
+// Clicking the dark background closes it too
 detailsDialog.addEventListener("click", (clickEvent) => {
     if (clickEvent.target === detailsDialog) {
         closeEventDetails();
@@ -335,9 +335,9 @@ detailsDialog.addEventListener("click", (clickEvent) => {
 });
 
 
-// ---------- delete ----------
+// Delete
 
-// also used by the Delete button in the edit form
+// Also used by the Delete button in the edit form
 export async function deleteEventWithConfirm(event) {
     let message = 'Delete "' + event.title + '"? This can\'t be undone.';
 
@@ -352,7 +352,7 @@ export async function deleteEventWithConfirm(event) {
     try {
         await deleteEventAndExtras(event, auth.currentUser.uid);
 
-        // tells the calendar/dashboard to reload
+        // Tells the calendar/dashboard to reload
         window.dispatchEvent(new CustomEvent("timeshift:event-deleted"));
         return true;
     } catch (error) {
@@ -363,7 +363,7 @@ export async function deleteEventWithConfirm(event) {
 }
 
 $("details-delete").addEventListener("click", async () => {
-    // for a repeat, delete the real event (the whole series)
+    // For a repeat, delete the real event (the whole series)
     const event = currentEvent.seriesEvent || currentEvent;
     const deleted = await deleteEventWithConfirm(event);
 
@@ -373,21 +373,21 @@ $("details-delete").addEventListener("click", async () => {
 });
 
 
-// ---------- edit ----------
+// Edit
 
 $("details-edit").addEventListener("click", () => {
     closeEventDetails();
 
-    // for a repeat, edit the real event (the first date), not the copy
+    // A repeat date is a display copy. Edit the saved event so the change applies to the whole series.
     const event = currentEvent.seriesEvent || currentEvent;
 
-    // the calendar page has the event form, so open it there
+    // The calendar page has the event form, so open it there
     if (document.getElementById("event-form")) {
         window.dispatchEvent(
             new CustomEvent("timeshift:edit-event", { detail: event })
         );
     } else {
-        // dashboard doesn't have the form, so go to the calendar page
+        // The edit form lives on the Calendar page, so the Dashboard opens it there.
         window.location.href = "./calendar.html?edit=" + event.id;
     }
 });
