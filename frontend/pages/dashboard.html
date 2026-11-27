@@ -44,7 +44,9 @@
                 <p id="event-count">0 events</p>
             </div>
 
-            <!-- dashboard.js puts the events in here -->
+            <p class="gray">The Dashboard shows repeat dates up to 90 days ahead.</p>
+
+            <!-- The Dashboard script adds date groups and event cards here. -->
             <div id="events-list"></div>
 
             <div id="empty-events" hidden>
@@ -55,5 +57,6 @@
     </div>
 
     <script type="module" src="../js/pages/dashboard.js"></script>
+    <script type="module" src="../js/reminder-bell.js"></script>
 </body>
 </html>

@@ -1,9 +1,8 @@
-/* TimeShift - CS 370 Team 13
-   one css file for all the pages */
+/* TimeShift styles shared by all pages. CS 370 Team 13. */
 
 @import url("https://fonts.googleapis.com/css2?family=Lora:wght@600&display=swap");
 
-/* matcha colors */
+/* Matcha colors */
 :root {
     --green: #5f8a3a;
     --dark-green: #4b7029;
@@ -27,7 +26,7 @@ body {
     font-family: Arial, Helvetica, sans-serif;
 }
 
-/* the fancy font is only for the logo and titles */
+/* Use the display font for headings and the TimeShift logo. */
 h1, .logo, #month-year {
     font-family: "Lora", Georgia, serif;
 }
@@ -50,7 +49,7 @@ h2 {
 }
 
 
-/* ---------- navbar ---------- */
+/* Navbar */
 
 .navbar {
     background-color: var(--light-green);
@@ -71,7 +70,7 @@ h2 {
     gap: 8px;
 }
 
-/* globe logo */
+/* Globe logo */
 .navbar .logo img {
     width: 32px;
     height: 32px;
@@ -105,7 +104,7 @@ h2 {
 }
 
 
-/* ---------- page layout ---------- */
+/* Page layout */
 
 .container {
     max-width: 1000px;
@@ -129,7 +128,7 @@ footer {
 }
 
 
-/* ---------- buttons ---------- */
+/* Buttons */
 
 .btn {
     background-color: var(--green);
@@ -166,7 +165,7 @@ footer {
 }
 
 
-/* ---------- login page ---------- */
+/* Login page */
 
 .login-box {
     width: 380px;
@@ -202,7 +201,7 @@ footer {
 }
 
 
-/* ---------- dashboard ---------- */
+/* Dashboard */
 
 .top-row {
     display: flex;
@@ -230,7 +229,7 @@ footer {
     margin: 20px 0 8px 0;
 }
 
-/* event in the list (made in dashboard.js) */
+/* Event in the list (made in dashboard.js) */
 .event-card {
     display: flex;
     align-items: center;
@@ -290,7 +289,7 @@ footer {
 }
 
 
-/* ---------- calendar ---------- */
+/* Calendar */
 
 .calendar-top {
     display: flex;
@@ -378,19 +377,19 @@ footer {
     margin-bottom: 4px;
 }
 
-/* today is pink (strawberry matcha)*/
+/* Use the strawberry accent to highlight today. */
 .calendar-dates .current-date {
     background-color: var(--pink);
     font-weight: bold;
 }
 
-/* blank days before the 1st */
+/* Blank days before the 1st */
 .calendar-dates div.empty-date {
     background-color: #f0eee6;
     cursor: default;
 }
 
-/* events in a day (made in calendar.js) */
+/* Events in a day (made in calendar.js) */
 .calendar-event {
     display: block;
     width: 100%;
@@ -408,7 +407,7 @@ footer {
 }
 
 
-/* ---------- new event popup ---------- */
+/* New event popup */
 
 #event-dialog,
 #calendar-dialog {
@@ -491,12 +490,12 @@ footer {
     text-align: right;
 }
 
-/* delete button goes on the left side */
+/* Delete button goes on the left side */
 .form-buttons .left-button {
     float: left;
 }
 
-/* ---------- event details popup ---------- */
+/* Event details popup */
 
 #details-dialog {
     width: 95%;
@@ -521,7 +520,7 @@ footer {
     padding: 15px;
 }
 
-/* the two time boxes side by side */
+/* The two time boxes side by side */
 .time-box {
     display: inline-block;
     vertical-align: top;
@@ -576,14 +575,14 @@ footer {
     color: var(--gray);
 }
 
-/* keeps line breaks the user typed + long links wrap */
+/* Preserve the user's line breaks and wrap long links. */
 #details-description,
 #details-link {
     white-space: pre-wrap;
     word-break: break-word;
 }
 
-/* ---------- settings ---------- */
+/* Settings */
 
 .settings-field {
     display: block;
@@ -623,7 +622,7 @@ footer {
 }
 
 
-/* ---------- dark mode (from settings) ---------- */
+/* Dark mode (from settings) */
 
 html[data-theme="dark"] {
     --green: #7fae55;
@@ -652,7 +651,7 @@ html[data-theme="dark"] {
 }
 
 
-/* ---------- phones ---------- */
+/* Phones */
 
 @media (max-width: 650px) {
     .top-row, .calendar-top {
@@ -691,5 +690,107 @@ html[data-theme="dark"] {
 
     .login-box {
         width: 90%;
+    }
+}
+
+/* Keep sharing separate from the main calendar controls. */
+.shared-calendar-panel {
+    margin-top: 1rem;
+    overflow-wrap: anywhere;
+}
+
+.shared-calendar-panel details {
+    margin-bottom: 1rem;
+}
+
+.shared-calendar-panel form {
+    margin-top: 0.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: baseline;
+}
+
+.shared-calendar-panel li {
+    margin-bottom: 0.5rem;
+}
+
+.shared-calendar-panel li button {
+    margin-inline-start: 0.6rem;
+}
+
+/* Keep the reminder dropdown within the header on small screens. */
+.reminder-bell {
+    position: relative;
+    margin-left: auto;
+    padding: 0.35rem 0;
+}
+
+.reminder-bell + .sign-out {
+    margin-left: 0.75rem;
+}
+
+.reminder-bell summary {
+    cursor: pointer;
+    color: var(--dark-green);
+    font-weight: bold;
+}
+
+.reminder-count {
+    display: inline-block;
+    min-width: 1.3em;
+    text-align: center;
+    border-radius: 1em;
+    padding: 0.1em 0.3em;
+    background: var(--pink);
+}
+
+.reminder-count[hidden] {
+    display: none;
+}
+
+.reminder-panel {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    z-index: 10;
+    width: min(17rem, 75vw);
+    max-height: 55vh;
+    overflow: auto;
+    padding: 0.65rem;
+    background: var(--box);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--text);
+    overflow-wrap: anywhere;
+}
+
+.reminder-status {
+    margin: 0;
+}
+
+.reminder-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.reminder-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0;
+}
+
+@media (max-width: 550px) {
+    .reminder-bell {
+        position: static;
+    }
+    .navbar {
+        position: relative;
+    }
+    .reminder-panel {
+        right: 1rem;
     }
 }

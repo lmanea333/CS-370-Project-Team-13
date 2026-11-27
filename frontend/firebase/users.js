@@ -7,62 +7,67 @@ import {
 
 import { db } from "./config.js";
 
-export async function saveUserProfile(user) {  //saves a user's profile information
-    const userRef = doc(db, "users", user.uid);     //finds the user document using their id
-    const profile = await getDoc(userRef);  //checks if the profile already exists
+// Use the Firebase account ID so each sign-in updates the same profile document.
+export async function saveUserProfile(user) {
+    const userRef = doc(db, "users", user.uid);
+    const profile = await getDoc(userRef);
 
     const userData = {
-        displayName: user.displayName ?? "",    //uses an empty name if one is not available
-        email: user.email ?? "",  //saves the user's email
-        photoURL: user.photoURL ?? "",     //uses an empty value if there is no profile picture
-        lastLoginAt: serverTimestamp()  //records the user's most recent login
+        displayName: user.displayName ?? "",
+        email: user.email ?? "",
+        photoURL: user.photoURL ?? "",
+        lastLoginAt: serverTimestamp()
     };
 
-    if (!profile.exists()) {   //only adds these fields for a new user
+    // Only set defaults on the first sign-in. Otherwise we would overwrite the person's saved settings.
+    if (!profile.exists()) {
         userData.timeZone =
-            Intl.DateTimeFormat().resolvedOptions().timeZone;  //gets the user's current time zone
+            Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-        userData.theme = "system";     //uses the device theme by default
-        userData.defaultCalendarId = "personal";  //sets personal as the default calendar
-        userData.accountStatus = "active";    //starts the account as active
-        userData.createdAt = serverTimestamp();  //records when the account was created
+        userData.theme = "system";
+        userData.defaultCalendarId = "personal";
+        userData.accountStatus = "active";
+        userData.createdAt = serverTimestamp();
     }
 
     return setDoc(
         userRef,
         userData,
+        // Keep existing preferences when we update the Google profile or last sign-in time.
         {
-            merge: true   //keeps fields that are already stored
+            merge: true
         }
     );
 }
 
-export async function getUserProfile(userId) {    //loads a user's saved profile
+export async function getUserProfile(userId) {
     const profile = await getDoc(
         doc(db, "users", userId)
-    );  //gets the profile using the user's id
+    );
 
-    if (!profile.exists()) {   //checks if a profile was found
-        return null;  //returns nothing if the profile does not exist
+    // The pages can use their defaults if no profile has been saved yet.
+    if (!profile.exists()) {
+        return null;
     }
 
     return {
-        uid: profile.id,     //includes the user's document id
-        ...profile.data()  //includes the rest of the profile information
+        uid: profile.id,
+        ...profile.data()
     };
 }
 
-export function updateUserSettings(userId, settings) {  //updates the user's settings
-    const userRef = doc(db, "users", userId);    //finds the user document
+export function updateUserSettings(userId, settings) {
+    const userRef = doc(db, "users", userId);
 
     return setDoc(
         userRef,
         {
-            timeZone: settings.timeZone,   //saves the selected time zone
-            theme: settings.theme,  //saves the selected theme
-            defaultCalendarId: settings.defaultCalendarId,     //saves the default calendar
-            updatedAt: serverTimestamp()  //records when the settings were changed
+            timeZone: settings.timeZone,
+            theme: settings.theme,
+            defaultCalendarId: settings.defaultCalendarId,
+            updatedAt: serverTimestamp()
         },
-        { merge: true }    //updates these fields without replacing the whole profile
+        // Merge the settings so the display name and other profile fields stay intact.
+        { merge: true }
     );
 }

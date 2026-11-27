@@ -1,7 +1,5 @@
-// Import the worldwide timezone list
-import { getTimeZones } from "@vvo/tzdb";
+import { getTimeZoneOptions } from "../time-zone-options.js";
 
-// Import our Google authentication functions
 import { logOut, watchAuthState } from "../../firebase/auth.js";
 import {
     getUserProfile,
@@ -13,9 +11,6 @@ import {
     saveTheme
 } from "../theme.js";
 
-// --------------------------------------------------
-// 1. Get the elements from settings.html
-// --------------------------------------------------
 
 const settingsForm = document.getElementById("settings-form");
 
@@ -34,45 +29,17 @@ const signOutButton = document.getElementById("sign-out-button");
 let signedInUser = null;
 
 
-// --------------------------------------------------
-// 2. Add worldwide timezones to the dropdown
-// --------------------------------------------------
+// Add worldwide timezones to the dropdown
 
 function addTimeZonesToDropdown() {
-    const timeZones = getTimeZones({ includeUtc: true });
-
-    for (const zone of timeZones) {
-        const option = document.createElement("option");
-
-        // This is the timezone value that will be saved
-        option.value = zone.name;
-
-        // Use the timezone name if no city is available
-        let location = zone.name;
-
-        // Use city names when the timezone has them
-        if (zone.mainCities && zone.mainCities.length > 0) {
-            location = zone.mainCities.join(", ");
-        }
-
-        // This is what the user sees in the dropdown
-        option.textContent =
-            location + " — " + zone.currentTimeFormat;
-
-        timeZoneSelect.appendChild(option);
+    for (const { value, label } of getTimeZoneOptions()) {
+        timeZoneSelect.add(new Option(label, value));
     }
+
 }
 
 
-// --------------------------------------------------
-// 3. Change the page color theme
-// --------------------------------------------------
-
-
-
-// --------------------------------------------------
-// 4. Display the current time
-// --------------------------------------------------
+// Display the current time
 
 function updateCurrentTime() {
     const selectedTimeZone = timeZoneSelect.value;
@@ -104,9 +71,7 @@ function updateCurrentTime() {
 }
 
 
-// --------------------------------------------------
-// 5. Load previously saved settings
-// --------------------------------------------------
+// Load the settings from this account. Keep the browser defaults if the profile is missing.
 
 function loadSavedSettings(profile = null) {
     let savedTheme =
@@ -146,9 +111,7 @@ function loadSavedSettings(profile = null) {
 }
 
 
-// --------------------------------------------------
-// 6. Save settings in the browser
-// --------------------------------------------------
+// Apply settings in this browser immediately, then save them to the signed-in account.
 
 async function saveSettings(event) {
     // Stop the form from refreshing the page
@@ -195,9 +158,7 @@ async function saveSettings(event) {
 }
 
 
-// --------------------------------------------------
-// 7. Display the signed-in Google user
-// --------------------------------------------------
+// Display the signed-in Google user
 
 async function displayGoogleUser(user) {
     // Send the user to login if they are not signed in
@@ -247,9 +208,7 @@ async function displayGoogleUser(user) {
 }
 
 
-// --------------------------------------------------
-// 8. Sign the user out
-// --------------------------------------------------
+// Sign the user out
 
 async function signOutUser() {
     await logOut();
@@ -257,9 +216,7 @@ async function signOutUser() {
 }
 
 
-// --------------------------------------------------
-// 9. Start the Settings page
-// --------------------------------------------------
+// Start the Settings page
 
 // Add the timezone options first
 addTimeZonesToDropdown();

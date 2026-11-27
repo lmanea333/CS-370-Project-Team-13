@@ -6,7 +6,7 @@ import { fromZonedTime, formatInTimeZone } from "date-fns-tz";
 import { getEventRepetitions } from "../firebase/repetitions.js";
 
 
-// firebase gives back a Timestamp, so turn it into a Date
+// Convert Firestore timestamps to Date objects before comparing or formatting them.
 function toDate(value) {
     if (!value) {
         return null;
@@ -47,7 +47,7 @@ export function getOccurrencesBetween(event, rangeStart, rangeEnd) {
     const start = toDate(event.startAt);
     const end = toDate(event.endAt);
 
-    // events that don't repeat just show up once
+    // One-time events appear only when their start date is in the requested range.
     if (!event.repeat) {
         if (start >= rangeStart && start <= rangeEnd) {
             return [event];
@@ -55,10 +55,10 @@ export function getOccurrencesBetween(event, rangeStart, rangeEnd) {
         return [];
     }
 
-    // how long the event is (so every copy has the same length)
+    // How long the event is (so every copy has the same length)
     const length = end ? end - start : 0;
 
-    // the repeat follows the ORIGINAL time zone, so "every Monday 9am Tokyo"
+    // The repeat follows the ORIGINAL time zone, so "every Monday 9am Tokyo"
     // stays 9am in Tokyo even when daylight saving time changes somewhere else
     const zone = event.timeZone || "UTC";
     const year = Number(formatInTimeZone(start, zone, "yyyy"));
@@ -68,10 +68,10 @@ export function getOccurrencesBetween(event, rangeStart, rangeEnd) {
 
     const occurrences = [];
 
-    // how many real dates we've counted so far
+    // How many real dates we've counted so far
     let made = 0;
 
-    // 3000 is just a safety limit so it can't loop forever
+    // Cap the loop so an open-ended series can't run forever.
     for (let count = 0; count < 3000; count++) {
         let date;
 
@@ -87,16 +87,16 @@ export function getOccurrencesBetween(event, rangeStart, rangeEnd) {
             break;
         }
 
-        // ex: "2026-11-23T09:00:00" in the original time zone
+        // Ex: "2026-11-23T09:00:00" in the original time zone
         const dateText = date.toISOString().slice(0, 10);
         const occurrenceStart = fromZonedTime(dateText + "T" + time, zone);
 
-        // stop once we're past the dates we need
+        // Stop once we're past the dates we need
         if (occurrenceStart > rangeEnd) {
             break;
         }
 
-        // monthly/yearly: skip months that don't have that day
+        // Monthly/yearly: skip months that don't have that day
         // (ex: the 31st in April, or Feb 29 when it's not a leap year)
         const isMonthOrYear =
             event.repeat === "monthly" || event.repeat === "yearly";
@@ -105,7 +105,7 @@ export function getOccurrencesBetween(event, rangeStart, rangeEnd) {
             continue;
         }
 
-        // stop after the number of times the user picked
+        // Stop after the number of times the user picked
         made++;
         if (event.repeatCount && made > event.repeatCount) {
             break;
